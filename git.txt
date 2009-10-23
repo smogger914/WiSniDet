@@ -1,0 +1,8 @@
+git clone git@github.com:smogger914/WiSniDet.git //clones repository
+
+git add javanli/* // add folder to be commited
+
+git commit -a // commits to local repositpry
+
+git push origin master // pushed to the internet
+
