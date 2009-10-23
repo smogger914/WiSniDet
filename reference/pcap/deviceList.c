@@ -3,13 +3,19 @@
 
 int main (int argc, char *argv[]) {
 
+  pcap_if_t * alldevs;
+  pcap_if_t * d;
   char * dev, errbuf[PCAP_ERRBUF_SIZE];
 
-  dev = pcap_lookupdev (errbuf);
-  if (dev == NULL) {
+  if (pcap_findalldevs (&alldevs, errbuf) == -1) {
     fprintf (stderr, "Couldn't find default device: %s\n", errbuf);
     return (2);
   }
-  printf ("Device: %s\n", dev);
+
+  d = alldevs;
+  while (d != NULL) {
+    printf ("dev: %s\n", d->name); 
+    d = d->next;
+  }
   return 0;
 }
