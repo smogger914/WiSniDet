@@ -1,9 +1,15 @@
+
 Table of Contents:
 
-  1. Installation
+  0.  Introduction
+  1.  Installation
 
+0.  Introduction
 
-1. Installation
+  This project is a part of the Senior Capstone project at 
+  Santa Clara University during the 2009-2010 academic year.
+
+1.  Installation
 
   make configure
   make
