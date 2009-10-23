@@ -8,3 +8,13 @@ git push origin master // pushed to the internet
 changed...
 
 
+/* Setup upstream from other people */
+git remote add upstream git://github.com/[following]/[project].git
+git fetch upstream
+
+/* Pulling upstream changes */
+git fetch upstream master
+git merge upstream/master
+
+/* Verifying, pulling most up to date */
+git pull upstream master
