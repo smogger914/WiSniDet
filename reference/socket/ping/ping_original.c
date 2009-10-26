@@ -23,9 +23,10 @@
 
 /*
  *  File:         ping_original.c
- *  Description:  Original Ping code from 1983, modified
- *                Added in-line comments for modifications to properly
- *                compile with modern gcc
+ *  Description:  - Original Ping code from 1983, modified
+ *                - Added in-line comments for modifications to properly
+ *                  compile with modern gcc
+ *                - Included get_avg_time() function
  *  Website:      http://www.ping127001.com/pingpage.htm
  *  Date:         2009 October 25
  */
@@ -87,14 +88,15 @@ long timing = 0;
 long tmin = 999999999;
 long tmax = 0;
 long tsum = 0;		        /* sum of all times, for doing average */
+long tavg = 0;
 void finish(), catcher();
+long get_avg_time();
 char *inet_ntoa();
 
 /*
  * 			M A I N
  */
-main(argc, argv)
-char *argv[];
+main(int argc, char *argv[])
 {
 	struct sockaddr_in from;
 	char **av = argv;
@@ -200,8 +202,9 @@ char *argv[];
 	for(i=0; i < preload; i++)
 		pinger();
 
-	if(!(pingflags & FLOOD))
+	if(!(pingflags & FLOOD)) {
 		catcher();	/* start things going */
+        }
 
 	for (;;) {
 		int len = sizeof (packet);
@@ -389,7 +392,9 @@ struct sockaddr_in *from;
 		printf("%d bytes from %s: icmp_type=%d (%s) icmp_code=%d\n",
                   /* added s_addr field for ntohl */
 		  cc, inet_ntoa(ntohl(from->sin_addr.s_addr)),
-		  icp->icmp_type, pr_type(icp->icmp_type), icp->icmp_code);/*DFM*/
+		  icp->icmp_type, pr_type(icp->icmp_type), icp->icmp_code);
+                  /*DFM*/
+
 		if (pingflags & VERBOSE) {
 			for( i=0; i<12; i++)
 				printf("x%2.2x: x%8.8x\n", i*sizeof(long),
@@ -419,6 +424,7 @@ struct sockaddr_in *from;
 			  icp->icmp_seq );	/* DFM */
 			if (timing) {
 				printf(" time=%ld ms\n", triptime );
+                                printf ("avg_time: %ld\n", get_avg_time());
                         }
 			else
 				putchar('\n');
@@ -524,4 +530,20 @@ void finish()
 		tmax );
 	fflush(stdout);
 	exit(0);
+}
+
+long get_avg_time() {
+
+  /*
+  if (ntransmitted)
+    if( nreceived > ntransmitted)
+      printf("-- somebody's printing up packets!");
+    else
+      printf("%d%% packet loss", 
+            (int) (((ntransmitted-nreceived)*100) /
+            ntransmitted));
+  */
+  if (nreceived && timing) 
+    tavg = tsum / (nreceived + 1); /* +1 for the first packet */
+  return tavg;
 }
