@@ -1,0 +1,28 @@
+/*
+ *  -I/usr/lib/jvm/java-6-sun-1.6.0.12/include
+ *    You should have this somewhere similar.
+ *    Search Synaptic Package Manager for "jdk" and when you find
+ *    the java-6 jdk, right click properties. Click the tab that
+ *    shows installed files and find something similar
+ *
+ *  -I/usr/lib/jvm/java-6-sun.1.6.0.12/include/linux
+ *    Find same as above.
+ *    This includes the jni.h file required to compile the C
+ *
+ *  HelloWorld.c
+ *    The file you want to compile
+ *
+ *  -o HelloWorld.so
+ *    Compile it into a shared object file
+ */
+
+gcc -shared -I/usr/lib/jvm/java-6-sun-1.6.0.12/include -I/usr/lib/jvm/java-6-sun-1.6.0.12/include/linux HelloWorld.c -o libHelloWorld.so
+
+/*
+ *  Don't know what this does. 
+ *  I think it adds the current directory (.) to the java.library.path
+ *  temporarily
+ */
+
+java -Djava.library.path=. HelloWorld 
+
