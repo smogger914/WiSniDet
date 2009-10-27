@@ -78,7 +78,7 @@ char usage[] =
 char *hostname;
 char hnamebuf[MAXHOSTNAMELEN];
 
-int npackets = 5;
+int npackets = 32;              /* amount of pings to send */
 int preload = 0;		/* number of packets to "preload" */
 int ntransmitted = 0;		/* sequence # for outbound packets = #sent */
 int ident;
