@@ -52,7 +52,7 @@
 #include <netinet/ip_icmp.h>
 #include <netdb.h>
 
-#define	MAXWAIT		10	/* max time to wait for response, sec. */
+#define	MAXWAIT		3	/* max time to wait for response, sec. */
 #define	MAXPACKET	4096	/* max packet size */
 #define VERBOSE		1	/* verbose flag */
 #define QUIET		2	/* quiet flag */
@@ -399,6 +399,12 @@ struct sockaddr_in *from;
 		  cc, inet_ntoa(ntohl(from->sin_addr.s_addr)),
 		  icp->icmp_type, pr_type(icp->icmp_type), icp->icmp_code);
                   /*DFM*/
+
+                /* Check if icmp_type is ICMP_UNREACH */
+                if (icp->icmp_type == ICMP_UNREACH) {
+                  printf ("destination unreachable\n");
+                  signal(SIGALRM, finish);
+                }
 
 		if (pingflags & VERBOSE) {
 			for( i=0; i<12; i++)
