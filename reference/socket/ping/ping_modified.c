@@ -233,8 +233,11 @@ main(int argc, char *argv[])
 			continue;
 		}
 		pr_pack( packet, cc, &from );
-		if (npackets && nreceived >= npackets)
-			finish();
+		if (npackets && nreceived >= npackets) {
+                        return get_avg_time();
+                        //printf ("%d\n", get_avg_time());
+			//finish();
+                }
 	}
 	/*NOTREACHED*/
 }
@@ -426,7 +429,7 @@ struct sockaddr_in *from;
 			  icp->icmp_seq );	/* DFM */
 			if (timing) {
 				printf(" time=%ld ms\n", triptime );
-                                printf ("avg_time: %ld\n", get_avg_time());
+                                //printf ("avg_time: %ld\n", get_avg_time());
                         }
 			else
 				putchar('\n');
@@ -546,6 +549,6 @@ long get_avg_time() {
             ntransmitted));
   */
   if (nreceived && timing) 
-    tavg = tsum / (nreceived + 1); /* +1 for the first packet */
+    tavg = tsum / (nreceived);
   return tavg;
 }
