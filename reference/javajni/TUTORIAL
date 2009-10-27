@@ -1,4 +1,9 @@
 /*
+ *  Lines adapted from:
+ *    http://www.linux.com/community/blogs/simple-jni-on-ubuntu-904.html
+ */
+
+/*
  *  -I/usr/lib/jvm/java-6-sun-1.6.0.12/include
  *    You should have this somewhere similar.
  *    Search Synaptic Package Manager for "jdk" and when you find
