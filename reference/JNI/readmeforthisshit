@@ -1,0 +1,10 @@
+gcc -o javatestjava.so -shared -Wl,-soname,javatest.so -I//usr/lib/jvm/default-java/include -I/usr/lib/jvm/default-java/include/linux CTest.c -static -lc
+
+
+gcc -shared -I/usr/lib/jvm/java-6-sun-1.6.0.12/include -I/usr/lib/jvm/java-6-sun-1.6.0.12/include/linux CTest.c -o libJavaTest.so
+//.loadLibrary("whatver");
+//the library that you import should be called lib+"whatver"
+
+foid@foid-laptop:~/myStuff/SeniorDesign/newTest$ java -Djava.library.path=. JavaTest
+
+--compile and link...

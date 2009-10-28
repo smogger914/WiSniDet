@@ -9,6 +9,7 @@ changed...
 
 
 /* Setup upstream from other people */
+/*be in correct directory... */
 git remote add upstream git://github.com/[following]/[project].git
 git fetch upstream
 
