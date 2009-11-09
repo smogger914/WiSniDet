@@ -31,10 +31,10 @@ int displayBuckets() {
  *		1						Element found
  */
 
-int hasElement () {
+int hasElement (unsigned long ipAddr) {
 
 	int found = 0;
-	findElement (&found);
+	findElement (ipAddr, &found);
 	if (found == 0)
 		return 0;
 	return 1;
@@ -52,11 +52,45 @@ int hasElement () {
  *		0						No error
  */
 
-int findElement (int * locn) {
+int findElement (unsigned long ipAddr, int * locn) {
 
+	// Init values, have hash position
 	int retVal = 0;
+	int hashPos = hashFunction (ipAddr);
+	struct dataElement * p = hashTable[hashPos];
+	int i;
+	*locn = -1;
+
+	while (p != NULL && p->status == FILLED) {
+
+		if (p->ipAddr == ipAddr) {
+			*locn = p->dataPos;
+			break;
+		}
+		else {
+			p = p->nextData;
+		}
+	}
 
 	return retVal;
+}
+
+/*
+ *	Function: 		findEmptyDataPos
+ *	Description:	Returns an empty position in the data slot
+ *
+ *	PARAMS:
+ *
+ *
+ *	RETURN:
+ *		0						No error
+ */
+int insertHash (int pos, int val) {
+
+ int i;
+ int retVal = 0;
+ int empty = -1;
+
 }
 
 /*
@@ -75,19 +109,5 @@ int insertHash (int pos, int val) {
  int retVal = 0;
  int empty = -1;
 
- for (i = 0; i < ARRAY_SIZE; i++) {
-  if (bar[i].val == 0) {
-    empty = i;
-    break;
-  }
- }
- if (empty >= 0) {
-    hash[pos] = &bar[empty];
-    bar[empty].val = val;
-    printf ("barval = %d\n", bar[empty].val);
-    printf ("pos = %d, empty = %d, val = %d\n", pos, empty, val);
- }
- return retVal;
- 
 }
 
