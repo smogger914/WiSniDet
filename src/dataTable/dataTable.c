@@ -21,6 +21,29 @@ int displayBuckets() {
  **********************************/
 
 /*
+ *	Function:			hashFunction
+ *	Description:	Calculates the hash position
+ *
+ *	PARAMS:
+ *		ipAddr			Network format for IP address
+ *
+ *	RETURN:
+ *		retVal			Result from hash function
+ */
+
+int hashFunction (unsigned long ipAddr) {
+
+	int retVal = 0;
+
+	// Hash function
+
+	// End hash function
+
+	return retVal;
+}
+
+
+/*
  *	Function:			hasElement
  *	Description:	Looks for a specific value in the data table
  *
@@ -46,7 +69,8 @@ int hasElement (unsigned long ipAddr) {
  *	Description:	Looks for a specific value in the data table
  *
  *	PARAMS:
- *		locn				Location of the element, or free space in the data table
+ *		ipAddr			IP address in network format (unsigned 32bit int)		
+ *		*locn				Location of the element, or free space in the data table
  *
  *	RETURN:
  *		0						No error
@@ -80,17 +104,32 @@ int findElement (unsigned long ipAddr, int * locn) {
  *	Description:	Returns an empty position in the data slot
  *
  *	PARAMS:
- *
+ *		ipAddr			IP address in network format (32 bit unsigned)
+ *		*locn				Location of the empty data table position
  *
  *	RETURN:
- *		0						No error
+ *		0						No error, empty dataPos in *locn
+ *		1						Failed to find empty data table position
  */
-int insertHash (int pos, int val) {
+int findEmptyDataPos (unsigned long ipAddr, int * locn) {
 
- int i;
- int retVal = 0;
- int empty = -1;
+	// Init values
+	int retVal = 0;
+	*locn = -1;
 
+	for (i = 0; i < DATA_SIZE; i++) {
+
+		if (dataTable[i].status == EMPTY) {
+			*locn = i;
+			break;
+		}
+	}
+
+	if (*locn == -1) {
+		retVal = 1;	
+	}
+
+	return retVal;
 }
 
 /*
@@ -103,11 +142,11 @@ int insertHash (int pos, int val) {
  *	RETURN:
  *		0						No error
  */
-int insertHash (int pos, int val) {
+int insertHash (unsigned long ipAddr) {
 
- int i;
  int retVal = 0;
- int empty = -1;
+
+
 
 }
 

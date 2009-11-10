@@ -40,7 +40,12 @@ int displayHash(int pos);	// Display the hash position + collisions
 int displayBuckets();			// Display the bucket
 # endif /* DEBUG */
 
-int insertHash (int pos, int val);	// Insert to hash table
-int 
+int hashFunction (unsigned long ipAddr);
+
+int hasElement (unsigned long ipAddr);
+int findElement (unsigned long ipAddr, int * locn);
+int findEmptyDataPos (unsigned long ipAddr, int * locn);
+
+int insertHash (unsigned long ipAddr);	// Insert to hash table
 
 # endif /* ifndef DATATABLE */
