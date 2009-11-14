@@ -74,6 +74,7 @@ int hasElement (unsigned long ipAddr) {
  *
  *	RETURN:
  *		0						No error
+ *		1						Not found
  */
 
 int findElement (unsigned long ipAddr, int * locn) {
@@ -92,8 +93,12 @@ int findElement (unsigned long ipAddr, int * locn) {
 			break;
 		}
 		else {
-			p = p->nextData;
+			p = p->nextHash;
 		}
+	}
+
+	if (*locn == -1) {
+		retVal = 1;
 	}
 
 	return retVal;
@@ -133,6 +138,40 @@ int findEmptyDataPos (unsigned long ipAddr, int * locn) {
 }
 
 /*
+ *	Function:			lastHashElement
+ *	Description:	Saves the dataPos of the last element in the 
+ *								hash table's linked list into *locn.
+ *
+ *	PARAMS:
+ *		hashPos			hashPos that we search from
+ *		*locn				Save the dataPos here
+ *
+ *	RETURN:
+ *		0						No error
+ *		1						Found EMPTY but not NULL position
+ *								When does this happen?
+ */
+int lastHashElement (int hashPos, int * locn) {
+
+	int retVal = 0;
+	struct dataElement * p;
+	p = hashTable[hashPos];
+
+	while (p != NULL) {
+		if (p->status == EMPTY) {
+			if (*locn == -1) {
+				retVal = 1;
+			}
+			break;
+		}
+		*locn = p->dataPos;
+		p = p->nextHash;
+	}
+
+	return retVal;
+}
+
+/*
  *	Function: 		insertHash
  *	Description:	Inserts a value into the hash table
  *
@@ -147,6 +186,7 @@ int insertHash (unsigned long ipAddr) {
 	int retVal = 0;
 	int hashPos = hashFunction (ipAddr);
 	int dataPos;
+	int tempVal;
 	char ipStr[IP_STR_LEN];
 	char macStr[MAC_STR_LEN];
 
@@ -174,20 +214,43 @@ int insertHash (unsigned long ipAddr) {
 		dataTable[dataPos].nextHash = NULL;
 		dataTable[dataPos].prevHash = NULL;
 
-		// Need the following?
-		dataTable[dataPos].nextData = dataTable[dataPos+1];
-		dataTable[dataPos].prevData = dataTable[dataPos-1];
-
 	} /* endif EMPTY */
 	else {
 
 		// Collision
 		if (findEmptyDataPos (ipAddr, &dataPos)) {
 			// Error: Data table full
-		} /* endif empty data pos */
+		} /* endif empty data pos, findEmptyDataPos */
 		
-		// Insert at end of list
-			
+		// In hash table linked list already?
+		if (findElement (ipAddr, tempVal)) {
+			// ipAddr not found in the list
+
+			// Get to end of list
+			if (lastHashElement (hashPos, tempVal)) {
+				// Error: Absurd
+			} // tempVal = dataPos of the last element in hash linked list
+
+			// Insert at end of list
+			dataTable[dataPos].hashPos = hashPos;
+			dataTable[dataPos].dataPos = dataPos;
+			dataTable[dataPos].status = FILLED;
+			dataTable[dataPos].ipAddr = ipAddr;
+			strncpy (dataTable[dataPos].macStr, macStr, MAC_STR_LEN);
+			dataTable[dataPos].nextHash = NULL;
+			dataTable[dataPos].prevHash = dataTable[tempVal];	
+
+			// Previous now points to newest
+			dataTable[tempVal].nextHash = dataTable[dataPos];
+
+		} /* endif findElement */
+		else { 
+			// found in hash table linked list--update now
+
+
+
+		} /* endelse findElement */
+			// tempVal = does this ipAddr already exist in hashTable
 
 	} /* endif FILLED */
 

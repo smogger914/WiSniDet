@@ -51,6 +51,7 @@ int hashFunction (unsigned long ipAddr);
 int hasElement (unsigned long ipAddr);
 int findElement (unsigned long ipAddr, int * locn);
 int findEmptyDataPos (unsigned long ipAddr, int * locn);
+int lastHashElement (int hashPos, int * locn);
 
 int insertHash (unsigned long ipAddr);	// Insert to hash table
 
