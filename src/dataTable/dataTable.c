@@ -144,9 +144,54 @@ int findEmptyDataPos (unsigned long ipAddr, int * locn) {
  */
 int insertHash (unsigned long ipAddr) {
 
- int retVal = 0;
+	int retVal = 0;
+	int hashPos = hashFunction (ipAddr);
+	int dataPos;
+	char ipStr[IP_STR_LEN];
+	char macStr[MAC_STR_LEN];
 
+	// Convert format
+	if (ipStr = inet_ntop(ipAddr)) {
 
+	}
+
+	// Does it already exist?
+	if (hashTable[hashPos]->status == EMPTY) {
+
+		// No collision
+		if (findEmptyDataPos (ipAddr, &dataPos)) {
+			// Error: Data table full
+		} /* endif empty data pos */
+
+		// Data table has vacancy, insert
+		hashTable[hashPos] = &dataTable[dataPos];
+
+		dataTable[dataPos].hashPos = hashPos;
+		dataTable[dataPos].dataPos = dataPos;
+		dataTable[dataPos].status = FILLED;
+		dataTable[dataPos].ipAddr = ipAddr;
+		strncpy (dataTable[dataPos].macStr, macStr, MAC_STR_LEN);
+		dataTable[dataPos].nextHash = NULL;
+		dataTable[dataPos].prevHash = NULL;
+
+		// Need the following?
+		dataTable[dataPos].nextData = dataTable[dataPos+1];
+		dataTable[dataPos].prevData = dataTable[dataPos-1];
+
+	} /* endif EMPTY */
+	else {
+
+		// Collision
+		if (findEmptyDataPos (ipAddr, &dataPos)) {
+			// Error: Data table full
+		} /* endif empty data pos */
+		
+		// Insert at end of list
+			
+
+	} /* endif FILLED */
+
+	return retVal;
 
 }
 
