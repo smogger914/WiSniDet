@@ -7,22 +7,29 @@
 # include <time.h>
 
 # ifndef DEBUG
-# 	define DEBUG			1							// Debug?
+# 	define DEBUG				1							// Debug?
 # endif /* ifndef DEBUG */
 
-# define DATA_SIZE		256						// Maximum size of data table array
-# define HASH_SIZE 		512 					// Maximum size of hash table size
-# define IP_STR_LEN		64						// Length of IP in presentation format
-																		// Use this for strn* functions
-# define MAC_STR_LEN	64						// Length of MAC in presentation format
-																		// Use this for strn* functions
-# define IP_STR_ARR		IP_STR_LEN+1	// IP strength length + null
-																		// Make arrays this size in the struct
-# define MAC_STR_ARR	MAC_STR_LEN+1	// MAC string length + null
-																		// Make arrays this size in the struct
+# define DATA_SIZE			256						// Maximum size of data table array
+# define HASH_SIZE 			512 					// Maximum size of hash table size
+# define IP_STR_LEN			64						// Length of IP in presentation format
+																			// Use this for strn* functions
+# define MAC_STR_LEN		64						// Length of MAC in presentation format
+																			// Use this for strn* functions
+# define IP_STR_ARR			IP_STR_LEN+1	// IP strength length + null
+																			// Make arrays this size in the struct
+# define MAC_STR_ARR		MAC_STR_LEN+1	// MAC string length + null
+																			// Make arrays this size in the struct
 
-# define EMPTY				0
-# define FILLED				1
+# define EMPTY					0
+# define FILLED					1
+# define OFF						0
+# define ON							1
+
+# define PING_BASELINE	0
+# define PING_ONOFF			1
+# define DEAUTH_SENT		2
+# define DEAUTH_RECV		3	
 
 struct dataElement {
   int hashPos;	// Index position in the hash table

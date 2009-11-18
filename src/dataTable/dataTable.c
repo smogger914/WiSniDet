@@ -257,7 +257,9 @@ int insertHash (unsigned long ipAddr) {
 						break;
 			case: PING_ONOFF		// Method 2
 						break;
-			case: DEAUTH_FOUND	// Method 3
+			case: DEAUTH_SENT		// Method 3
+						break;
+			case: DEAUTH_RECV		// Method 4
 						break;
 			default:
 						break; //wtf
@@ -275,14 +277,43 @@ int insertHash (unsigned long ipAddr) {
 
 /*
  *	Function: 		lookupHash
- *	Description:	
+ *	Description:	Returns the value that we are looking for
  *
  *	PARAMS:
- *
+ *		ipAddr			The ip address of the value we are searching for
+ *		searching		The value we are searching for (#define in header)
  *
  *	RETURN:
  *		0						No error
+ *		1						ipAddr not found in hash table
  */
-int lookupHash (unsigned long ipAddr) {
+int lookupHash (unsigned long ipAddr, int searching) {
 
+	int retVal = 0;
+	int locn;
+	struct dataElement p;
+
+	if (findElement(ipAddr, &locn)) {
+		// Not found
+		// Return not found
+		retVal = 1
+
+	} /* endif findElement */
+
+	// Returned dataPos in locn
+	p = dataTable[locn];
+
+	switch (searching) {
+	case	PING_BASELINE:
+				
+				break;
+	case 	PING_ONOFF:
+				break;
+	case	DEAUTH_SENT:
+				break;
+	case	DEAUTH_RECV
+				break;
+	}
+
+	return retVal;
 }
