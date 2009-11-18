@@ -56,9 +56,9 @@ int hashFunction (unsigned long ipAddr) {
 
 int hasElement (unsigned long ipAddr) {
 
-	int found = 0;
+	int found = -1;
 	findElement (ipAddr, &found);
-	if (found == 0)
+	if (found == -1)
 		return 0;
 	return 1;
 }
@@ -195,6 +195,9 @@ int insertHash (unsigned long ipAddr) {
 
 	}
 
+	// Find MAC address
+
+
 	// Does it already exist?
 	if (hashTable[hashPos]->status == EMPTY) {
 
@@ -247,7 +250,19 @@ int insertHash (unsigned long ipAddr) {
 		else { 
 			// found in hash table linked list--update now
 
-
+			/*
+			// Update the specific value you want
+			switch (update) {
+			case:	PING_BASELINE // Method 1
+						break;
+			case: PING_ONOFF		// Method 2
+						break;
+			case: DEAUTH_FOUND	// Method 3
+						break;
+			default:
+						break; //wtf
+			}
+			*/
 
 		} /* endelse findElement */
 			// tempVal = does this ipAddr already exist in hashTable
@@ -258,3 +273,16 @@ int insertHash (unsigned long ipAddr) {
 
 }
 
+/*
+ *	Function: 		lookupHash
+ *	Description:	
+ *
+ *	PARAMS:
+ *
+ *
+ *	RETURN:
+ *		0						No error
+ */
+int lookupHash (unsigned long ipAddr) {
+
+}

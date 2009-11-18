@@ -54,5 +54,6 @@ int findEmptyDataPos (unsigned long ipAddr, int * locn);
 int lastHashElement (int hashPos, int * locn);
 
 int insertHash (unsigned long ipAddr);	// Insert to hash table
+int lookupHash (unsigned long ipAddr);	// Lookup a value from hash table
 
 # endif /* ifndef DATATABLE */
