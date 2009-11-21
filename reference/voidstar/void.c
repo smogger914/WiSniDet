@@ -7,10 +7,11 @@ int returnd (int i, void * p) {
 	int retVal = 0;
 	switch (i) {
 	case 	1:
-				p = 3;
+				printf ("p = %d\n", p);
 				break;
+	// works
 	case 	2:
-				strncpy ((char*)p, "hello world\n", sizeof(p));
+				printf ("p = %s\n", p);
 				break;
 	}
 	return retVal;
@@ -18,11 +19,12 @@ int returnd (int i, void * p) {
 
 int main () {
 
-	char h[30];
-	int i;
-
-	returnd (1, &i);
-	printf ("i = %d\n", i);
-	returnd (2, h);
-	printf ("h = %s\n", h);
+	int i[30];
+	int *p;
+	p = 5;
+	i[0] = 4;
+	i[3] = 3;
+	printf ("i[3] = %d\n", i[3]);
+	returnd (1, p);
+	returnd (2, "hello world");
 }
