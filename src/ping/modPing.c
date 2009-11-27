@@ -47,67 +47,7 @@
 
 
 /* Included for Debian compilation  */
-#include <stdlib.h>
-#include <string.h>
-#include <signal.h>
-/***/
-
-#include <stdio.h>
-#include <errno.h>
-#include <sys/time.h>
-
-#include <sys/param.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/file.h>
-
-#include <netinet/in_systm.h>
-#include <netinet/in.h>
-#include <netinet/ip.h>
-#include <netinet/ip_icmp.h>
-#include <netdb.h>
-
-#define	MAXWAIT		3	/* max time to wait for response, sec. */
-#define	MAXPACKET	4096	/* max packet size */
-#define VERBOSE		1	/* verbose flag */
-#define QUIET		2	/* quiet flag */
-#define FLOOD		4	/* floodping flag */
-#ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN	64
-#endif
-
-u_char	packet[MAXPACKET];
-int	i, pingflags, options;
-extern	int errno;
-
-int s;			/* Socket file descriptor */
-struct hostent *hp;	/* Pointer to host info */
-struct timezone tz;	/* leftover */
-
-struct sockaddr whereto;/* Who to ping */
-int datalen;		/* How much data */
-
-char usage[] =
-"Usage:  ping [-dfqrv] host [packetsize [count [preload]]]n";
-
-char *hostname;
-char hnamebuf[MAXHOSTNAMELEN];
-
-int npackets = 10;              /* amount of pings to send */
-int preload = 0;		/* number of packets to "preload" */
-int ntransmitted = 0;		/* sequence # for outbound packets = #sent */
-int ident;
-
-int nreceived = 0;		/* # of packets we got back */
-long timing = 0;
-long tmin = 999999999;
-long tmax = 0;
-long tsum = 0;		        /* sum of all times, for doing average */
-long tavg = 0;
-void finish(), catcher();
-long get_avg_time();
-char *inet_ntoa();
-
+#include "modPing.h"
 /*
  * 			M A I N
  */

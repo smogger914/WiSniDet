@@ -46,6 +46,7 @@ struct dataElement {
 	int deauthRecv;		// DEAUTH_RECV, did you recv a deauth
 
 	unsigned long	ipAddr;				// Network format of IP addr
+	
 
 	struct * dataElement nextHash;	// Index position of the next in the hash
 	struct * dataElement prevHash;	// Index position of the prev in the hash
@@ -61,7 +62,7 @@ int displayHash(int pos);	// Display the hash position + collisions
 int displayBuckets();			// Display the bucket
 # endif /* DEBUG */
 
-int hashFunction (unsigned long ipAddr);
+int hashFunction (struct sockaddr *sa);
 
 int hasElement (unsigned long ipAddr);
 int findElement (unsigned long ipAddr, int * locn);
@@ -69,11 +70,13 @@ int findEmptyDataPos (unsigned long ipAddr, int * locn);
 int lastHashElement (int hashPos, int * locn);
 
 int insertHash (unsigned long ipAddr);	// Insert to hash table
-int lookupHash (unsigned long ipAddr);	// Lookup a value from hash table
-
-int pingBaseline (unsigned long ipAddr, int * result); 	// Handles both 
+int lookupHash (struct sockaddr *sa, int searching, int *returning);
+								
+int pingBaseline (struct sockaddr *sa, int * result); 	// Handles both 
 																												// PING_ONOFF and
 																												// PING_BASELINE
+
+int getIpAddr (struct sockaddr *sa, unsigned long * ipAddr);
 
 
 # endif /* ifndef DATATABLE */

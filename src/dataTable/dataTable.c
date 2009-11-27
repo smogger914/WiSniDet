@@ -31,12 +31,12 @@ int displayBuckets() {
  *		retVal			Result from hash function
  */
 
-int hashFunction (unsigned long ipAddr) {
+int hashFunction (struct sockaddr *sa) {
 
 	int retVal = 0;
 
 	// Hash function
-
+	
 	// End hash function
 
 	return retVal;
@@ -81,9 +81,9 @@ int findElement (unsigned long ipAddr, int * locn) {
 
 	// Init values, have hash position
 	int retVal = 0;
-	int hashPos = hashFunction (ipAddr);
-	struct dataElement * p = hashTable[hashPos];
+	int hashPos = hashFunction (sa);
 	int i;
+	struct dataElement * p = hashTable[hashPos];
 	*locn = -1;
 
 	while (p != NULL && p->status == FILLED) {
@@ -181,10 +181,11 @@ int lastHashElement (int hashPos, int * locn) {
  *	RETURN:
  *		0						No error
  */
-int insertHash (unsigned long ipAddr) {
+int insertHash (struct sockaddr *sa) {
 
+	int ipAddr;
 	int retVal = 0;
-	int hashPos = hashFunction (ipAddr);
+	int hashPos = hashFunction (sa);
 	int dataPos;
 	int tempVal;
 
@@ -196,10 +197,7 @@ int insertHash (unsigned long ipAddr) {
 	char ipStr[IP_STR_LEN];
 
 	// Convert format
-	if (ipStr = inet_ntop(ipAddr)) {
-
-	}
-
+	getIpAddr (sa, *ipAddr);
 
 	// Does it already exist?
 	if (hashTable[hashPos]->status == EMPTY) {
@@ -266,7 +264,8 @@ int insertHash (unsigned long ipAddr) {
  *	Description:	Returns the value that we are looking for
  *
  *	PARAMS:
- *		ipAddr			The ip address of the value we are searching for
+ *		*sa					The ip address of the value we are searching for as
+ *								a sockaddr struct
  *		searching		The value we are searching for (#define in header)
  *		*returning	Store here the value of what we searching
  *
@@ -274,11 +273,14 @@ int insertHash (unsigned long ipAddr) {
  *		0						No error
  *		1						ipAddr not found in hash table
  */
-int lookupHash (unsigned long ipAddr, int searching, int * returning) {
+int lookupHash (struct sockaddr *sa, int searching, int * returning) {
 
 	int retVal = 0;
 	int locn;
+	int ipAddr;
 	struct dataElement p;
+
+	getIpAddr (sa, *ipAddr);
 
 	if (findElement(ipAddr, &locn)) {
 		// Not found
@@ -313,7 +315,7 @@ int lookupHash (unsigned long ipAddr, int searching, int * returning) {
  *	Description:	Return average ping times in ms	
  *
  *	PARAMS:
- *		ipAddr			The ip address of the value we are searching for
+ *		*sa					struct sockaddr to hold IP address in network mode	
  *		*result			Store here the value of what we searching
  *
  *	RETURN:
@@ -322,14 +324,22 @@ int lookupHash (unsigned long ipAddr, int searching, int * returning) {
  *		2						Host unreachable (ping is off)
  */
 
-int pingBaseline (unsigned long ipAddr, int * result) {
+int pingBaseline (struct sockaddr *sa, int * result) {
 
 	int retVal = 0;
 	int temp;
-	struct sockaddr_in sa;
-	char s[INET_ADDRSTRLEN];
-	inet_ntop(AF_INET, &(sa.sin_addr), s, INET_ADDRSTRLEN);
-	char * s = inet_ntop(ipAddr);
+	char *s;
+
+	switch (sa->family) {
+	case	AF_INET:
+				inet_ntop (AF_INET, &(((struct sockaddr_in *)sa)->sin_addr), 
+									s, INET_ADDRSTRLEN);
+				break;
+	case 	AF_INET6:
+				inet_ntop(AF_INET6, &(((struct sockaddr_in6 *)sa)->sin6_addr),
+									s, INET6_ADDRSTRLEN);
+				break;
+	}
 
 	temp = avgPing(s);
 
@@ -343,3 +353,22 @@ int pingBaseline (unsigned long ipAddr, int * result) {
 	return retVal;
 }
 
+
+
+int getIpAddr (struct sockaddr *sa, unsigned long * ipAddr) {
+
+	int retVal = 0;
+
+	switch (sa->family) {
+	case 	AF_INET:
+				*ipAddr = ((struct sockaddr_in *)sa)->sin_addr.s_addr;
+				break;
+	/*
+	case	AF6_INET:
+				// must be unsigned char[16]
+				break;
+	*/
+	}
+
+	return retVal;
+}
