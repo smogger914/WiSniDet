@@ -25,6 +25,10 @@
 # define FILLED					1
 # define OFF						0
 # define ON							1
+# define NO							0
+# define YES						1
+# define FALSE					0
+# define TRUE						1
 
 # define PING_BASELINE	0
 # define PING_ONOFF			1
@@ -36,8 +40,12 @@ struct dataElement {
   int dataPos;	// Index position in the bucket/data table
 	int	status;		// EMPTY or FILLED
 
+	int pbaseline;		// PING_BASELINE, baseline ping stored
+	int ponoff;				// PING_ONOFF, do you allow pings
+	int deauthSent;		// DEAUTH_SENT, did you send a deauth
+	int deauthRecv;		// DEAUTH_RECV, did you recv a deauth
+
 	unsigned long	ipAddr;				// Network format of IP addr
-	char	macStr[MAC_STR_ARR];	// Presentation format of MAC addr
 
 	struct * dataElement nextHash;	// Index position of the next in the hash
 	struct * dataElement prevHash;	// Index position of the prev in the hash
@@ -62,5 +70,10 @@ int lastHashElement (int hashPos, int * locn);
 
 int insertHash (unsigned long ipAddr);	// Insert to hash table
 int lookupHash (unsigned long ipAddr);	// Lookup a value from hash table
+
+int pingBaseline (unsigned long ipAddr, int * result); 	// Handles both 
+																												// PING_ONOFF and
+																												// PING_BASELINE
+
 
 # endif /* ifndef DATATABLE */

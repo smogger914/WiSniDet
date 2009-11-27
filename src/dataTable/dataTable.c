@@ -187,15 +187,18 @@ int insertHash (unsigned long ipAddr) {
 	int hashPos = hashFunction (ipAddr);
 	int dataPos;
 	int tempVal;
+
+	int pbaseline;
+	int ponoff;
+	int deauthSent;
+	int deauthRecv;
+
 	char ipStr[IP_STR_LEN];
-	char macStr[MAC_STR_LEN];
 
 	// Convert format
 	if (ipStr = inet_ntop(ipAddr)) {
 
 	}
-
-	// Find MAC address
 
 
 	// Does it already exist?
@@ -213,7 +216,6 @@ int insertHash (unsigned long ipAddr) {
 		dataTable[dataPos].dataPos = dataPos;
 		dataTable[dataPos].status = FILLED;
 		dataTable[dataPos].ipAddr = ipAddr;
-		strncpy (dataTable[dataPos].macStr, macStr, MAC_STR_LEN);
 		dataTable[dataPos].nextHash = NULL;
 		dataTable[dataPos].prevHash = NULL;
 
@@ -239,7 +241,6 @@ int insertHash (unsigned long ipAddr) {
 			dataTable[dataPos].dataPos = dataPos;
 			dataTable[dataPos].status = FILLED;
 			dataTable[dataPos].ipAddr = ipAddr;
-			strncpy (dataTable[dataPos].macStr, macStr, MAC_STR_LEN);
 			dataTable[dataPos].nextHash = NULL;
 			dataTable[dataPos].prevHash = dataTable[tempVal];	
 
@@ -248,24 +249,9 @@ int insertHash (unsigned long ipAddr) {
 
 		} /* endif findElement */
 		else { 
-			// found in hash table linked list--update now
+			// found in hash table linked list--update now?
 
-			/*
-			// Update the specific value you want
-			switch (update) {
-			case:	PING_BASELINE // Method 1
-						break;
-			case: PING_ONOFF		// Method 2
-						break;
-			case: DEAUTH_SENT		// Method 3
-						break;
-			case: DEAUTH_RECV		// Method 4
-						break;
-			default:
-						break; //wtf
-			}
-			*/
-
+	
 		} /* endelse findElement */
 			// tempVal = does this ipAddr already exist in hashTable
 
@@ -282,12 +268,13 @@ int insertHash (unsigned long ipAddr) {
  *	PARAMS:
  *		ipAddr			The ip address of the value we are searching for
  *		searching		The value we are searching for (#define in header)
+ *		*returning	Store here the value of what we searching
  *
  *	RETURN:
  *		0						No error
  *		1						ipAddr not found in hash table
  */
-int lookupHash (unsigned long ipAddr, int searching) {
+int lookupHash (unsigned long ipAddr, int searching, int * returning) {
 
 	int retVal = 0;
 	int locn;
@@ -305,15 +292,54 @@ int lookupHash (unsigned long ipAddr, int searching) {
 
 	switch (searching) {
 	case	PING_BASELINE:
-				
+				*returning = p.pbaseline;	
 				break;
 	case 	PING_ONOFF:
+				*returning = p.ponoff;
 				break;
 	case	DEAUTH_SENT:
+				*returning = p.dauthSent;
 				break;
 	case	DEAUTH_RECV
+				*returning = p.deauthRecv;
 				break;
 	}
 
 	return retVal;
 }
+
+/*
+ *	Function: 		pingBaseline
+ *	Description:	Return average ping times in ms	
+ *
+ *	PARAMS:
+ *		ipAddr			The ip address of the value we are searching for
+ *		*result			Store here the value of what we searching
+ *
+ *	RETURN:
+ *		0						No error
+ *		1						ipAddr not found in hash table
+ *		2						Host unreachable (ping is off)
+ */
+
+int pingBaseline (unsigned long ipAddr, int * result) {
+
+	int retVal = 0;
+	int temp;
+	struct sockaddr_in sa;
+	char s[INET_ADDRSTRLEN];
+	inet_ntop(AF_INET, &(sa.sin_addr), s, INET_ADDRSTRLEN);
+	char * s = inet_ntop(ipAddr);
+
+	temp = avgPing(s);
+
+	if (temp == -1) {
+		// Unreachable destination
+		return 2;
+	}
+	// Destination reachable
+	*result = temp;
+
+	return retVal;
+}
+

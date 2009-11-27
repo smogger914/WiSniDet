@@ -2,7 +2,7 @@
 # include <string.h>
 # include <stdlib.h>
 
-int returnd (int i, void * p) {
+int returnd (int i, void * p, void * q) {
 
 	int retVal = 0;
 	switch (i) {
