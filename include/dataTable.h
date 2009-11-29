@@ -6,6 +6,18 @@
 # include <stdio.h>
 # include <time.h>
 
+#include <sys/param.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/file.h>
+
+#include <netinet/in_systm.h>
+#include <netinet/in.h>
+#include <netinet/ip.h>
+#include <netinet/ip_icmp.h>
+#include <netdb.h>
+
+
 # ifndef DEBUG
 # 	define DEBUG				1							// Debug?
 # endif /* ifndef DEBUG */
@@ -62,21 +74,22 @@ int displayHash(int pos);	// Display the hash position + collisions
 int displayBuckets();			// Display the bucket
 # endif /* DEBUG */
 
-int hashFunction (struct sockaddr *sa);
+int hashFunction (short af, struct in_addr inaddr);
 
 int hasElement (unsigned long ipAddr);
 int findElement (unsigned long ipAddr, int * locn);
 int findEmptyDataPos (unsigned long ipAddr, int * locn);
 int lastHashElement (int hashPos, int * locn);
 
-int insertHash (unsigned long ipAddr);	// Insert to hash table
-int lookupHash (struct sockaddr *sa, int searching, int *returning);
+int insertHash (short af, struct in_addr inaddr);	// Insert to hash table
+int lookupHash (short af, struct in_addr inaddr, int searching, int *returning);
 								
-int pingBaseline (struct sockaddr *sa, int * result); 	// Handles both 
+int pingBaseline (short af, struct in_addr inaddr, int * result); 	
+																												// Handles both 
 																												// PING_ONOFF and
 																												// PING_BASELINE
 
-int getIpAddr (struct sockaddr *sa, unsigned long * ipAddr);
+int getIpAddr (short af, struct in_addr inaddr, unsigned long * ipAddr);
 
 
 # endif /* ifndef DATATABLE */

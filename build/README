@@ -1,0 +1,6 @@
+From this directory, use:
+
+					cmake ..
+
+so that all the cmake build files are in here and don't clutter
+the source trees.
