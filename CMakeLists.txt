@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
 PROJECT(seniordesign C)
-
 ADD_DEFINITIONS (-Wall -g)
 
 ADD_SUBDIRECTORY (src)
@@ -13,3 +12,7 @@ SET(SOURCES
 						src/main/main.c
 						)
 
+INCLUDE_DIRECTORIES (${CMAKE_SOURCE_DIR}/include)
+
+ADD_EXECUTABLE (seniordesign 	
+															${SOURCES})

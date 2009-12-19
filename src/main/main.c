@@ -1,3 +1,5 @@
+# include "main.h"
+
 void sighandler ( int sig ) {
 
 	fprintf (stderr, "\nShutdown.\n");
@@ -6,32 +8,30 @@ void sighandler ( int sig ) {
 
 int main ( int argc, char * argv[] ) {
 
-  int i;
-
 	// Signal catching
 	if (signal (SIGINT, sighandler) == SIG_IGN)
-		signal (SIGINT, SIG_IGN)
+		signal (SIGINT, SIG_IGN);
 	if (signal (SIGHUP, sighandler) == SIG_IGN)
-		signal (SIGHUP, SIG_IGN)
+		signal (SIGHUP, SIG_IGN);
 	if (signal (SIGTERM, sighandler) == SIG_IGN)
-		signal (SIGTERM, SIG_IGN)
+		signal (SIGTERM, SIG_IGN);
 	if (signal (SIGKILL, sighandler) == SIG_IGN)
-		signal (SIGKILL, SIG_IGN)
+		signal (SIGKILL, SIG_IGN);
 
 	// Allocate memory
-  bar = malloc (ARRAY_SIZE * sizeof (struct foo));
-  hash = malloc (HASH_SIZE * sizeof (struct foo *));
+  dataTable = malloc (DATA_SIZE * sizeof (struct dataElement));
+  hashTable = malloc (HASH_SIZE * sizeof (struct dataElement *));
 
 	// Set memory to zero
-  memset (bar, 0, sizeof (bar));
-  memset (hash, 0, sizeof (hash));
+  memset (dataTable, 0, sizeof (dataTable));
+  memset (hashTable, 0, sizeof (hashTable));
 
 	// NULL checks
-  if (bar == NULL) {
+  if (dataTable == NULL) {
     printf ("fail malloc error\n");
     exit (1);
   }
-  if (hash == NULL) {
+  if (hashTable == NULL) {
     printf ("fail malloc error\n");
     exit (1);
   }
@@ -39,6 +39,9 @@ int main ( int argc, char * argv[] ) {
 	while (1) {
 
 		/* Listen for signal */
+
+		printf ("hello world\n");
+		break;
 	}
 
   return 1;

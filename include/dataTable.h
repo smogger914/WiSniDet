@@ -17,6 +17,7 @@
 #include <netinet/ip_icmp.h>
 #include <netdb.h>
 
+#include "modPing.h"
 
 # ifndef DEBUG
 # 	define DEBUG				1							// Debug?
@@ -60,10 +61,10 @@ struct dataElement {
 	unsigned long	ipAddr;				// Network format of IP addr
 	
 
-	struct * dataElement nextHash;	// Index position of the next in the hash
-	struct * dataElement prevHash;	// Index position of the prev in the hash
-	struct * dataElement nextData;	// Index position of the next in the data
-	struct * dataElement prevData;	// Index position of the prev in the data
+	struct dataElement * nextHash;	// Index position of the next in the hash
+	struct dataElement * prevHash;	// Index position of the prev in the hash
+	struct dataElement * nextData;	// Index position of the next in the data
+	struct dataElement * prevData;	// Index position of the prev in the data
 };
 
 struct dataElement * dataTable;
@@ -74,7 +75,7 @@ int displayHash(int pos);	// Display the hash position + collisions
 int displayBuckets();			// Display the bucket
 # endif /* DEBUG */
 
-int hashFunction (short af, struct in_addr inaddr);
+int hashFunction (short af, unsigned long ipaddr);
 
 int hasElement (unsigned long ipAddr);
 int findElement (unsigned long ipAddr, int * locn);

@@ -1,40 +1,6 @@
-/*
- *			P I N G . C
- *
- * Using the InterNet Control Message Protocol (ICMP) "ECHO" facility,
- * measure round-trip-delays and packet loss across network paths.
- *
- * Author -
- *	Mike Muuss
- *	U. S. Army Ballistic Research Laboratory
- *	December, 1983
- * Modified at Uc Berkeley
- *
- * Changed argument to inet_ntoa() to be struct in_addr instead of u_long
- * DFM BRL 1992
- *
- * Modified for returning values rather than printing to stdout
- * SCU K1Ko 2009
- *
- * Status -
- *	Public Domain.  Distribution Unlimited.
- *
- * Bugs -
- *	More statistics could always be gathered.
- *	This program has to run SUID to ROOT to access the ICMP socket.
- */
 
-/*
- *  File:         modPing.c
- *  Description:  - Original Ping code from 1983, modified
- *                - Added in-line comments for modifications to properly
- *                  compile with modern gcc
- *                - Included get_avg_time() function
- *								- Return desired values with helper functions
- *  Website:      http://www.ping127001.com/pingpage.htm
- *  Date:         2009 October 25
- */
- 
+#include "modPing.h"
+
 /*
  *	HOW TO USE
  *
@@ -45,9 +11,21 @@
  * 	}
  */
 
+char usage[] =
+"Usage:	ping [-dfqrv] host [packetsize [count [preload]]]\n";
 
-/* Included for Debian compilation  */
-#include "modPing.h"
+int npackets = 10;		// amount of pings to send
+int preload = 0;			// number of packets to preload
+int ntransmitted = 0;	// sequence # for outbound packets = #sent
+int ident;
+
+int nreceived = 0;		// # of packets we got back
+long timing = 0;
+long tmin = 999999999;
+long tmax = 0;
+long tsum = 0;				// sum of all times, for doing average
+long tavg = 0;
+
 /*
  * 			M A I N
  */
@@ -67,7 +45,8 @@ int avgPing(char *argv)
 
 	bzero((char *)&whereto, sizeof(struct sockaddr) );
 	to->sin_family = AF_INET;
-	to->sin_addr.s_addr = inet_addr(argv);
+	//to->sin_addr.s_addr = inet_addr(argv);
+	inet_pton(to->sin_family, argv, &to->sin_addr); // inet_addr deprecated
 	if(to->sin_addr.s_addr != (unsigned)-1) {
 		strcpy(hnamebuf, argv);
 		hostname = hnamebuf;
@@ -142,7 +121,8 @@ int avgPing(char *argv)
 
 	for (;;) {
 		int len = sizeof (packet);
-		int fromlen = sizeof (from);
+		//int fromlen = sizeof (from);
+		socklen_t fromlen = sizeof (from); // signedness error if only int type
 		int cc;
 		struct timeval timeout;
 		int fdmask = 1 << s;
@@ -217,7 +197,7 @@ void catcher()
  * of the data portion are used to hold a UNIX "timeval" struct in VAX
  * byte-order, to compute the round-trip time.
  */
-pinger()
+void pinger()
 {
 	static u_char outpack[MAXPACKET];
 	register struct icmp *icp = (struct icmp *) outpack;
@@ -240,7 +220,7 @@ pinger()
 		*datap++ = i;
 
 	/* Compute ICMP checksum here */
-	icp->icmp_cksum = in_cksum( icp, cc );
+	icp->icmp_cksum = in_cksum( (u_short *)icp, cc );
 
 	/* cc = sendto(s, msg, len, flags, to, tolen) */
 	i = sendto( s, outpack, cc, 0, &whereto, sizeof(struct sockaddr) );
@@ -262,9 +242,7 @@ pinger()
  *
  * Convert an ICMP "type" field to a printable string.
  */
-char *
-pr_type( t )
-register int t;
+char * pr_type( register int t )
 {
 	static char *ttab[] = {
 		"Echo Reply",
@@ -300,15 +278,14 @@ register int t;
  * which arrive ('tis only fair).  This permits multiple copies of this
  * program to be run without having intermingled output (or statistics!).
  */
-pr_pack( buf, cc, from )
-char *buf;
-int cc;
-struct sockaddr_in *from;
+int pr_pack( char * buf, int cc, struct sockaddr_in * from )
 {
+	char * buf1;
+	uint32_t tmp;
 	struct ip *ip;
 	register struct icmp *icp;
-	register long *lp = (long *) packet;
-	register int i;
+	//register long *lp = (long *) packet;
+	//register int i;
 	struct timeval tv;
 	struct timeval *tp;
 	int hlen;
@@ -320,12 +297,15 @@ struct sockaddr_in *from;
 	ip = (struct ip *) buf;
 	hlen = ip->ip_hl << 2;
 	if (cc < hlen + ICMP_MINLEN) {
-		if (pingflags & VERBOSE)
+		if (pingflags & VERBOSE) {
+			tmp = ntohl (from->sin_addr.s_addr);	
+			inet_ntop (AF_INET, &tmp, buf1, sizeof(buf1));
 			printf("packet too short (%d bytes) from %s\n", cc,
                                 /* added s_addr field for ntohl */
-				inet_ntoa(ntohl(from->sin_addr.s_addr))); 
+				buf1); 
                                 /* DFM */
-		return;
+		}
+		return 0;
 	}
 	cc -= hlen;
 	icp = (struct icmp *)(buf + hlen);
@@ -352,10 +332,10 @@ struct sockaddr_in *from;
 				  *lp++);
 			*/
 		}
-		return;
+		return 0;
 	}
 	if( icp->icmp_id != ident )
-		return;			/* 'Twas not our ECHO */
+		return 1;			/* 'Twas not our ECHO */
 
 	if (timing) {
 		tp = (struct timeval *)&icp->icmp_data[0];
@@ -391,6 +371,7 @@ struct sockaddr_in *from;
 		}
 	}
 	nreceived++;
+	return 0;
 }
 
 
@@ -400,9 +381,7 @@ struct sockaddr_in *from;
  * Checksum routine for Internet Protocol family headers (C Version)
  *
  */
-in_cksum(addr, len)
-u_short *addr;
-int len;
+u_short in_cksum(u_short * addr, int len)
 {
 	register int nleft = len;
 	register u_short *w = addr;
@@ -444,8 +423,7 @@ int len;
  * 
  * Out is assumed to be >= in.
  */
-tvsub( out, in )
-register struct timeval *out, *in;
+void tvsub( register struct timeval * out, register struct timeval * in )
 {
 	if( (out->tv_usec -= in->tv_usec) < 0 )   {
 		out->tv_sec--;
@@ -473,13 +451,15 @@ void finish()
 	printf("%d packets transmitted, ", ntransmitted );
 	printf("%d packets received, ", nreceived );
 	*/
-	if (ntransmitted)
+	if (ntransmitted) {
 		if( nreceived > ntransmitted)
 			printf("-- somebody's printing up packets!");
-		else
+		else {
 			printf("%d%% packet loss", 
 			  (int) (((ntransmitted-nreceived)*100) /
 			  ntransmitted));
+		}
+	}
 	printf("\n");
         /* tsum is total time of all packets travel */
 	if (nreceived && timing)

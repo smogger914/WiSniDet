@@ -1,7 +1,0 @@
-INCLUDE_DIRECTORIES (${CMAKE_SOURCE_DIR}/include)
-
-ADD_EXECUTABLE (main main.c)
-
-TARGET_LINK_LIBRARIES (main modPing dataTable)
-
-INSTALL_PROGRAMS (/bin FILES main)

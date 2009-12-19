@@ -1,16 +1,21 @@
+# include "dataTable.h"
 
 # ifdef DEBUG
 int displayHash(int pos) {
 
-  printf ("hash[%d]->val = %d\n", pos, hash[pos]->val);
+	int retVal = 0;
+
+  printf ("hash[%d]->ipAddr = %ld\n", pos, hashTable[pos]->ipAddr);
+	
+	return retVal;
 }
 
 int displayBuckets() {
   
   int i;
   int retVal = 0;
-  for (i = 0; i < ARRAY_SIZE; i++) {
-    printf ("bar[%d].val = %d\n", i, bar[i].val);
+  for (i = 0; i < DATA_SIZE; i++) {
+    printf ("dataTable[%d].ipAddr = %ld\n", i, dataTable[i].ipAddr);
   }
   return retVal;
 }
@@ -32,7 +37,7 @@ int displayBuckets() {
  *		retVal			Result from hash function
  */
 
-int hashFunction (short af, struct in_addr) {
+int hashFunction (short af, unsigned long ipaddr) {
 
 	int retVal = 0;
 
@@ -82,8 +87,8 @@ int findElement (unsigned long ipAddr, int * locn) {
 
 	// Init values, have hash position
 	int retVal = 0;
-	int hashPos = hashFunction (sa);
-	int i;
+	short af = AF_INET;
+	int hashPos = hashFunction (af, ipAddr);
 	struct dataElement * p = hashTable[hashPos];
 	*locn = -1;
 
@@ -116,11 +121,14 @@ int findElement (unsigned long ipAddr, int * locn) {
  *	RETURN:
  *		0						No error, empty dataPos in *locn
  *		1						Failed to find empty data table position
+ *
+ *	NOTE:					O(n) potentially
  */
 int findEmptyDataPos (unsigned long ipAddr, int * locn) {
 
 	// Init values
 	int retVal = 0;
+	int i;
 	*locn = -1;
 
 	for (i = 0; i < DATA_SIZE; i++) {
@@ -186,7 +194,7 @@ int insertHash (short af, struct in_addr inaddr) {
 
 	unsigned long ipAddr;
 	int retVal = 0;
-	int hashPos = hashFunction (af, inaddr);
+	int hashPos = hashFunction (af, ipAddr);
 	int dataPos;
 	int tempVal;
 
@@ -195,10 +203,8 @@ int insertHash (short af, struct in_addr inaddr) {
 	int deauthSent;
 	int deauthRecv;
 
-	char ipStr[IP_STR_LEN];
-
 	// Convert format
-	getIpAddr (af, inaddr, *ipAddr);
+	getIpAddr (af, inaddr, &ipAddr);
 
 	// Does it already exist?
 	if (hashTable[hashPos]->status == EMPTY) {
@@ -215,8 +221,13 @@ int insertHash (short af, struct in_addr inaddr) {
 		dataTable[dataPos].dataPos = dataPos;
 		dataTable[dataPos].status = FILLED;
 		dataTable[dataPos].ipAddr = ipAddr;
+		dataTable[dataPos].pbaseline = pbaseline;
+		dataTable[dataPos].ponoff = ponoff;
+		dataTable[dataPos].deauthSent = deauthSent;
+		dataTable[dataPos].deauthRecv = deauthRecv;
 		dataTable[dataPos].nextHash = NULL;
 		dataTable[dataPos].prevHash = NULL;
+		
 
 	} /* endif EMPTY */
 	else {
@@ -227,11 +238,11 @@ int insertHash (short af, struct in_addr inaddr) {
 		} /* endif empty data pos, findEmptyDataPos */
 		
 		// In hash table linked list already?
-		if (findElement (ipAddr, tempVal)) {
+		if (findElement (ipAddr, &tempVal)) {
 			// ipAddr not found in the list
 
 			// Get to end of list
-			if (lastHashElement (hashPos, tempVal)) {
+			if (lastHashElement (hashPos, &tempVal)) {
 				// Error: Absurd
 			} // tempVal = dataPos of the last element in hash linked list
 
@@ -240,11 +251,15 @@ int insertHash (short af, struct in_addr inaddr) {
 			dataTable[dataPos].dataPos = dataPos;
 			dataTable[dataPos].status = FILLED;
 			dataTable[dataPos].ipAddr = ipAddr;
+			dataTable[dataPos].pbaseline = pbaseline;
+			dataTable[dataPos].ponoff = ponoff;
+			dataTable[dataPos].deauthSent = deauthSent;
+			dataTable[dataPos].deauthRecv = deauthRecv;
 			dataTable[dataPos].nextHash = NULL;
-			dataTable[dataPos].prevHash = dataTable[tempVal];	
+			dataTable[dataPos].prevHash = &dataTable[tempVal];	
 
 			// Previous now points to newest
-			dataTable[tempVal].nextHash = dataTable[dataPos];
+			dataTable[tempVal].nextHash = &dataTable[dataPos];
 
 		} /* endif findElement */
 		else { 
@@ -282,12 +297,12 @@ int lookupHash (short af, struct in_addr inaddr,
 	unsigned long ipAddr;
 	struct dataElement p;
 
-	getIpAddr (af, inaddr, *ipAddr);
+	getIpAddr (af, inaddr, &ipAddr);
 
 	if (findElement(ipAddr, &locn)) {
 		// Not found
 		// Return not found
-		retVal = 1
+		retVal = 1;
 
 	} /* endif findElement */
 
@@ -302,9 +317,9 @@ int lookupHash (short af, struct in_addr inaddr,
 				*returning = p.ponoff;
 				break;
 	case	DEAUTH_SENT:
-				*returning = p.dauthSent;
+				*returning = p.deauthSent;
 				break;
-	case	DEAUTH_RECV
+	case	DEAUTH_RECV:
 				*returning = p.deauthRecv;
 				break;
 	}
@@ -364,7 +379,7 @@ int getIpAddr (short af, struct in_addr inaddr, unsigned long * ipAddr) {
 
 	switch (af) {
 	case 	AF_INET:
-				*ipAddr = sin_addr.s_addr;
+				*ipAddr = inaddr.s_addr;
 				break;
 	/*
 	case	AF6_INET:
