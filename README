@@ -11,6 +11,5 @@ Table of Contents:
 
 1.  Installation
 
-  make configure
-  make
-  make install
+	make
+	./seniordesign
