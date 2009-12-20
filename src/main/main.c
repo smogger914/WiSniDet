@@ -40,6 +40,16 @@ int main ( int argc, char * argv[] ) {
 
 		/* Listen for signal */
 
+		struct sockaddr_in sa;
+		char s[INET_ADDRSTRLEN] = "74.125.67.100";
+		printf ("s = %s\n", s);
+		inet_pton (AF_INET, s, &(sa.sin_addr));
+		inet_ntop (AF_INET, &(sa.sin_addr), s, INET_ADDRSTRLEN);
+		printf ("s = %s\n", s);
+		printf ("\n\n%d\n\n", avgPing(s));
+		printf ("also: %ld\n", (long)sa.sin_addr.s_addr);
+		printf ("we have %ld\n", (long)sa.sin_addr.s_addr);
+	
 		printf ("hello world\n");
 		break;
 	}
