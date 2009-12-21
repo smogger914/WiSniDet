@@ -84,13 +84,38 @@ int ip4NumRange (int s1, int s2, int s3, int s4,
 									int e1, int e2, int e3, int e4) {
 
 	int i, j, k, l;
-	printf ("%d %d %d %d\n%d %d %d %d\n", s1, s2, s3, s4, e1, e2, e3, e4);
+	char ipAddr[IP_STR_LEN];
+	char tmp[IP_STR_LEN];
+
+#ifdef DEBUG
+printf ("%d %d %d %d\n%d %d %d %d\n", s1, s2, s3, s4, e1, e2, e3, e4);
+#endif
+
 	for (i = s1; i <= e1; i++) {
 		for (j = s2; j <= e2; j++) {
 			for (k = s3; k <= e3; k++) {
 				for (l = s4; l <= e4; l++) {
 					// Do stuff here
 					printf ("%d.%d.%d.%d\n", i, j, k, l);
+
+					// Clear the string, construct ipAddress
+					strncpy (ipAddr, "", sizeof(ipAddr));
+					sprintf (tmp, "%d", i);
+					strcat (ipAddr, tmp);
+					strcat (ipAddr, ".");
+					sprintf (tmp, "%d", j);
+					strcat (ipAddr, tmp);
+					strcat (ipAddr, ".");
+					sprintf (tmp, "%d", k);
+					strcat (ipAddr, tmp);
+					strcat (ipAddr, ".");
+					sprintf (tmp, "%d", l);
+					strcat (ipAddr, tmp);
+
+					printf ("	%s\n", ipAddr);
+
+					// pass to the average ping time
+					printf ("average ping time: %d\n", avgPing (ipAddr));
 				}
 			}
 		}
@@ -159,6 +184,7 @@ int main ( int argc, char * argv[] ) {
 	
 		printf ("hello world\n");
 
+		//ip4StrRange ("74.125.67.100", "74.125.67.105");
 		ip4StrRange ("123.123.123.123", "123.123.123.130");
 
 		break;

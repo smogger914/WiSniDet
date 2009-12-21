@@ -107,17 +107,20 @@ int avgPing(char *argv)
 	}
 	setlinebuf( stdout );
 
+
 	signal( SIGINT, finish );
 	signal(SIGALRM, catcher);
 
 	/* fire off them quickies */
 	for(i=0; i < preload; i++) {
 		pinger();
-        }
+printf ("returned from pinger\n");
+  }
 
 	if(!(pingflags & FLOOD)) {
 		catcher();	/* start things going */
-        }
+printf ("returned from catcher\n");
+  }
 
 	for (;;) {
 		int len = sizeof (packet);
@@ -133,25 +136,31 @@ int avgPing(char *argv)
 		if(pingflags & FLOOD) {
                 //printf ("pinger inside\n");
 			pinger();
+printf ("return from pinger (in for)\n");
                         /* added (fd_set *) */
 			if( select(32, (fd_set *)&fdmask, 0, 0, &timeout) == 0)
 				continue;
 		}
+// below
+printf ("1\n");
 		if ((cc=recvfrom(s, packet, len, 0, 
                     /* typecasted (struct sockaddr *) */
                     (struct sockaddr *)&from, &fromlen)) < 0) {
+
+// above
 			if( errno == EINTR )
 				continue;
 			perror("ping: recvfrom");
 			continue;
 		}
+printf ("2\n");
 		if (pr_pack( packet, cc, &from ) == -1) {
 			//printf ("out of sight out of mind\n");
 			return -1; // unreachable destination
 		}
 		if (npackets && nreceived >= npackets) {
                   //      printf ("%d\n", get_avg_time());
-                        return get_avg_time(); // Once all pings finished
+      return get_avg_time(); // Once all pings finished
 			//finish();
     }
 	}
@@ -174,15 +183,25 @@ void catcher()
 	int waittime;
 
 	pinger();
-	if (npackets == 0 || ntransmitted < npackets)
+	printf ("returned from pinger (in catcher)\n");
+	if (npackets == 0 || ntransmitted < npackets) {
 		alarm(1);
+	}
 	else {
 		if (nreceived) {
 			waittime = 2 * tmax / 1000;
 			if (waittime == 0)
 				waittime = 1;
-		} else
-			waittime = MAXWAIT;
+		} 
+		else {
+				waittime = MAXWAIT;
+				printf ("nreceived is %d\n", nreceived);
+		}
+		printf ("ntransmitted is %d\n", ntransmitted);
+		printf ("nreceived is %d!\n", nreceived);
+		printf ("waittime! is %d\n", waittime);
+		printf ("want to return\n");
+		return;
 		signal(SIGALRM, finish);
 		alarm(waittime);
 	}
@@ -321,6 +340,7 @@ int pr_pack( char * buf, int cc, struct sockaddr_in * from )
                 /* Check if icmp_type is ICMP_UNREACH */
                 if (icp->icmp_type == ICMP_UNREACH) {
                   //printf ("destination unreachable\n");
+printf ("pr_pack unreachable\n");
 									return -1;
                   signal(SIGALRM, finish);
                 }
@@ -455,7 +475,7 @@ void finish()
 		if( nreceived > ntransmitted)
 			printf("-- somebody's printing up packets!");
 		else {
-			printf("%d%% packet loss", 
+			printf("%d%% packet loss !!", 
 			  (int) (((ntransmitted-nreceived)*100) /
 			  ntransmitted));
 		}
@@ -471,7 +491,8 @@ void finish()
 		tmax );
 	*/
 	fflush(stdout);
-	exit(0);
+
+	exit(7);
 }
 
 long get_avg_time() {
