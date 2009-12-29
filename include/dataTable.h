@@ -19,6 +19,7 @@
 
 #include "modPing.h"
 
+# define DEBUG					1
 # ifndef DEBUG
 # 	define DEBUG				1							// Debug?
 # endif /* ifndef DEBUG */

@@ -26,6 +26,11 @@ long tmax = 0;
 long tsum = 0;				// sum of all times, for doing average
 long tavg = 0;
 
+int mytmp = 0;
+int mystart = 0;			// ntransmitted - mystart = #sent
+int nsent = 0;				// #sent
+int prevrecv = 0;			// did we receive previous ping
+
 /*
  * 			M A I N
  */
@@ -38,6 +43,27 @@ long tavg = 0;
 
 int avgPing(char *argv)
 {
+
+	int rv;
+	struct pollfd fds;
+
+
+
+
+	nreceived = 0;		// # of packets we got back
+	tmax = 0;
+	tsum = 0;				// sum of all times, for doing average
+	tavg = 0;
+
+	mytmp = 0;
+	// !!! v below v !!!
+	mystart = ntransmitted;	// ntransmitted - mystart = #sent
+	nsent = ntransmitted - mystart;
+	prevrecv = 0;
+	
+	
+	
+
 	struct sockaddr_in from;
 	struct sockaddr_in *to = (struct sockaddr_in *) &whereto;
 	int on = 1;
@@ -130,8 +156,8 @@ printf ("returned from catcher\n");
 		struct timeval timeout;
 		int fdmask = 1 << s;
 
-		timeout.tv_sec = 0;
-		timeout.tv_usec = 10000;
+		timeout.tv_sec = 3;
+		timeout.tv_usec = 0;
 
 		if(pingflags & FLOOD) {
                 //printf ("pinger inside\n");
@@ -141,19 +167,48 @@ printf ("return from pinger (in for)\n");
 			if( select(32, (fd_set *)&fdmask, 0, 0, &timeout) == 0)
 				continue;
 		}
+
 // below
-printf ("1\n");
+printf ("1 + %d\n", mytmp);
+
+if (mytmp == 0) {
+if (nreceived == 0) {
+	printf ("have no received\n");
+	printf ("	sent %d\n", nsent);
+}
+
+
+
+fds.fd = s;
+fds.events = POLLIN;
+fds.revents = 0;
+
+rv = poll (&fds, 1, 10000);
+
+if (rv == -1) {
+	perror ("poll");
+}
+else if (rv == 0) {
+	printf ("timeout!\n");
+}
+else {
+
+
 		if ((cc=recvfrom(s, packet, len, 0, 
                     /* typecasted (struct sockaddr *) */
                     (struct sockaddr *)&from, &fromlen)) < 0) {
 
 // above
+
 			if( errno == EINTR )
 				continue;
 			perror("ping: recvfrom");
 			continue;
 		}
-printf ("2\n");
+
+prevrecv = 1;
+printf ("2!\n");
+}
 		if (pr_pack( packet, cc, &from ) == -1) {
 			//printf ("out of sight out of mind\n");
 			return -1; // unreachable destination
@@ -163,8 +218,20 @@ printf ("2\n");
       return get_avg_time(); // Once all pings finished
 			//finish();
     }
+}
+else {
+	printf ("avg_time: %ld\n", get_avg_time());
+	return get_avg_time();
+}
+
 	}
 	/*NOTREACHED*/
+}
+
+int rusrs() {
+	
+	printf ("r u srs\n");
+	return 1;
 }
 
 /*
@@ -181,10 +248,16 @@ printf ("2\n");
 void catcher()
 {
 	int waittime;
+	nsent = ntransmitted - mystart;
 
 	pinger();
-	printf ("returned from pinger (in catcher)\n");
-	if (npackets == 0 || ntransmitted < npackets) {
+/*
+printf ("returned from pinger (in catcher)\n");
+printf ("	trans + pack = %d + %d\n", nsent, npackets);
+printf ("	prevrecv? %d\n", prevrecv);
+*/
+	if (npackets == 0 || nsent < npackets) {
+		mytmp = 0;
 		alarm(1);
 	}
 	else {
@@ -195,15 +268,26 @@ void catcher()
 		} 
 		else {
 				waittime = MAXWAIT;
-				printf ("nreceived is %d\n", nreceived);
 		}
-		printf ("ntransmitted is %d\n", ntransmitted);
+
+		printf ("nreceived is %d\n", nreceived);
+		printf ("ntransmitted is %d\n", nsent);
 		printf ("nreceived is %d!\n", nreceived);
 		printf ("waittime! is %d\n", waittime);
 		printf ("want to return\n");
-		return;
-		signal(SIGALRM, finish);
-		alarm(waittime);
+
+		rusrs();
+		//return;
+		//signal(SIGALRM, finish);
+		//alarm(waittime);
+
+		if (prevrecv == 0) {
+			printf ("this is the end\n");
+			return;
+		}
+
+		prevrecv = 0;
+		mytmp = 1;
 	}
 }
 
@@ -224,10 +308,14 @@ void pinger()
 	register struct timeval *tp = (struct timeval *) &outpack[8];
 	register u_char *datap = &outpack[8+sizeof(struct timeval)];
 
+	nsent = ntransmitted - mystart;
+
 	icp->icmp_type = ICMP_ECHO;
 	icp->icmp_code = 0;
 	icp->icmp_cksum = 0;
-	icp->icmp_seq = ntransmitted++;
+//	icp->icmp_seq = ntransmitted++;
+	ntransmitted++;
+	icp->icmp_seq = nsent++;
 	icp->icmp_id = ident;		/* ID */
 
 	cc = datalen+8;			/* skips ICMP portion */
@@ -463,6 +551,7 @@ void tvsub( register struct timeval * out, register struct timeval * in )
  */
 void finish()
 {
+	nsent = ntransmitted - mystart;
         /* Added \ to form \n */
 	putchar('\n');
 	fflush(stdout);
@@ -471,13 +560,13 @@ void finish()
 	printf("%d packets transmitted, ", ntransmitted );
 	printf("%d packets received, ", nreceived );
 	*/
-	if (ntransmitted) {
-		if( nreceived > ntransmitted)
+	if (nsent) {
+		if( nreceived > nsent)
 			printf("-- somebody's printing up packets!");
 		else {
 			printf("%d%% packet loss !!", 
-			  (int) (((ntransmitted-nreceived)*100) /
-			  ntransmitted));
+			  (int) ((( nsent-nreceived)*100) /
+			  nsent));
 		}
 	}
 	printf("\n");
@@ -497,15 +586,6 @@ void finish()
 
 long get_avg_time() {
 
-  /*
-  if (ntransmitted)
-    if( nreceived > ntransmitted)
-      printf("-- somebody's printing up packets!");
-    else
-      printf("%d%% packet loss", 
-            (int) (((ntransmitted-nreceived)*100) /
-            ntransmitted));
-  */
   if (nreceived && timing) 
     tavg = tsum / (nreceived);
   return tavg;

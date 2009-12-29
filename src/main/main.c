@@ -187,6 +187,8 @@ int main ( int argc, char * argv[] ) {
 		//ip4StrRange ("74.125.67.100", "74.125.67.105");
 		ip4StrRange ("123.123.123.123", "123.123.123.130");
 
+		printf ("yahoo: ");
+		printf ("\n\n%d\n\n", avgPing("www.yahoo.com"));
 		break;
 	}
 

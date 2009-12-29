@@ -74,8 +74,9 @@
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <poll.h>
 
-#define	MAXWAIT		3	/* max time to wait for response, sec. */
+#define	MAXWAIT		2	/* max time to wait for response, sec. */
 #define	MAXPACKET	4096	/* max packet size */
 #define VERBOSE		1	/* verbose flag */
 #define QUIET		2	/* quiet flag */
