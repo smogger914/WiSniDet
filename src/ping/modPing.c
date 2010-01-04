@@ -148,7 +148,11 @@ printf ("returned from pinger\n");
 printf ("returned from catcher\n");
   }
 
+int asdf = 0;
 	for (;;) {
+
+printf ("			for looping: %d\n", asdf++);
+
 		int len = sizeof (packet);
 		//int fromlen = sizeof (from);
 		socklen_t fromlen = sizeof (from); // signedness error if only int type
@@ -183,14 +187,22 @@ fds.fd = s;
 fds.events = POLLIN;
 fds.revents = 0;
 
-rv = poll (&fds, 1, 10000);
+
+rv = poll (&fds, 1, 1000);
 
 if (rv == -1) {
 	perror ("poll");
 }
 else if (rv == 0) {
 	printf ("timeout!\n");
+	break;
+
 }
+/*
+if (1 == 0) {
+
+}
+*/
 else {
 
 
@@ -225,6 +237,8 @@ else {
 }
 
 	}
+	printf ("should never reach\n");
+	return get_avg_time();
 	/*NOTREACHED*/
 }
 
@@ -333,7 +347,10 @@ void pinger()
 	i = sendto( s, outpack, cc, 0, &whereto, sizeof(struct sockaddr) );
 
 	if( i < 0 || i != cc )  {
-		if( i<0 )  perror("sendto");
+		if( i<0 )  {
+			perror("sendto");
+			printf ("	error i = %d\n", i);	// unreachable network = -1
+		}
 		//printf("ping: wrote %s %d chars, ret=%d\n",
 	//		hostname, cc, i );
 		fflush(stdout);
@@ -451,6 +468,7 @@ printf ("pr_pack unreachable\n");
 		triptime = tv.tv_sec*1000
                             +(tv.tv_usec/1000);
 		tsum += triptime;
+printf ("triptime = %ld ms\n", triptime);
 		if( triptime < tmin )
 			tmin = triptime;
 		if( triptime > tmax )
@@ -586,8 +604,14 @@ void finish()
 
 long get_avg_time() {
 
+	long mytsum = tsum / 1000; // tsum is in ms
   if (nreceived && timing) 
-    tavg = tsum / (nreceived);
+    tavg = mytsum / (nreceived);
+
+	printf ("tavg = %ld\n", tavg);
+	printf ("mytsum = %ld\n", mytsum);
+	printf ("rcvd = %d\n", nreceived);
+
   return tavg;
 }
 

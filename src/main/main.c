@@ -178,17 +178,18 @@ int main ( int argc, char * argv[] ) {
 		inet_pton (AF_INET, s, &(sa.sin_addr));
 		inet_ntop (AF_INET, &(sa.sin_addr), s, INET_ADDRSTRLEN);
 		printf ("s = %s\n", s);
-		printf ("\n\n%d\n\n", avgPing(s));
+//		printf ("\n\n%d\n\n", avgPing(s));
 		printf ("also: %ld\n", (long)sa.sin_addr.s_addr);
 		printf ("we have %ld\n", (long)sa.sin_addr.s_addr);
 	
 		printf ("hello world\n");
 
 		//ip4StrRange ("74.125.67.100", "74.125.67.105");
-		ip4StrRange ("123.123.123.123", "123.123.123.130");
+		//ip4StrRange ("123.123.123.123", "123.123.123.130");
 
-		printf ("yahoo: ");
-		printf ("\n\n%d\n\n", avgPing("www.yahoo.com"));
+		printf ("yahoo: \n");
+		//printf ("\n\n%d\n\n", avgPing("www.yahoo.com"));
+		printf ("\n\n%d\n\n", avgPing ("localhost"));
 		break;
 	}
 

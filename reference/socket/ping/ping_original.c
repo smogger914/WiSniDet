@@ -513,6 +513,7 @@ void finish()
         /* Added \ to form \n */
 	putchar('\n');
 	fflush(stdout);
+	printf ("\n\ntsum = %ld ms \n", tsum);
 	printf("\n----%s PING Statistics----\n", hostname );
 	printf("%d packets transmitted, ", ntransmitted );
 	printf("%d packets received, ", nreceived );
