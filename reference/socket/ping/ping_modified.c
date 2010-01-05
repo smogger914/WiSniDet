@@ -215,15 +215,19 @@ main(int argc, char *argv[])
 		int fdmask = 1 << s;
 
 		timeout.tv_sec = 0;
-		timeout.tv_usec = 10000;
+		timeout.tv_usec = 5000;
 
+/*
 		if(pingflags & FLOOD) {
                 printf ("pinger inside\n");
 			pinger();
+*/
                         /* added (fd_set *) */
 			if( select(32, (fd_set *)&fdmask, 0, 0, &timeout) == 0)
 				continue;
+/*
 		}
+*/
 		if ((cc=recvfrom(s, packet, len, 0, 
                     /* typecasted (struct sockaddr *) */
                     (struct sockaddr *)&from, &fromlen)) < 0) {

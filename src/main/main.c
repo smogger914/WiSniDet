@@ -189,7 +189,13 @@ int main ( int argc, char * argv[] ) {
 
 		printf ("yahoo: \n");
 		//printf ("\n\n%d\n\n", avgPing("www.yahoo.com"));
-		printf ("\n\n%d\n\n", avgPing ("localhost"));
+		//printf ("\n\n%d\n\n", avgPing ("localhost"));
+		printf ("\n\ngoogle: %d\n\n", avgPing ("74.125.67.105"));
+		//printf ("\n\n%d\n\n", avgPing ("129.210.234.246"));
+		printf ("\n\n103: %d\n\n", avgPing ("129.210.237.103"));
+		printf ("\n\n130: %d\n\n", avgPing ("123.123.123.130"));
+		printf ("\n\nyahoo: %d\n\n", avgPing ("129.210.250.201"));
+		//printf ("\n\ngoogle: %d\n\n", avgPing ("123.123.123.130"));
 		break;
 	}
 

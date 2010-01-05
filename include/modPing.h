@@ -133,7 +133,8 @@ u_short in_cksum (u_short *, int);
 void tvsub (register struct timeval *, register struct timeval *);
 void finish();
 long get_avg_time();
-
+int isReachable (char *);
+void packetLoss();
 
 
 # endif /* MODPING */

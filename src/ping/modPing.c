@@ -2,6 +2,43 @@
 #include "modPing.h"
 
 /*
+ *			P I N G . C
+ *
+ * Using the InterNet Control Message Protocol (ICMP) "ECHO" facility,
+ * measure round-trip-delays and packet loss across network paths.
+ *
+ * Author -
+ *	Mike Muuss
+ *	U. S. Army Ballistic Research Laboratory
+ *	December, 1983
+ * Modified at Uc Berkeley
+ *
+ * Changed argument to inet_ntoa() to be struct in_addr instead of u_long
+ * DFM BRL 1992
+ *
+ * Modified for returning values rather than printing to stdout
+ * SCU K1Ko 2009
+ *
+ * Status -
+ *	Public Domain.  Distribution Unlimited.
+ *
+ * Bugs -
+ *	More statistics could always be gathered.
+ *	This program has to run SUID to ROOT to access the ICMP socket.
+ */
+
+/*
+ *  File:         modPing.c
+ *  Description:  - Original Ping code from 1983, modified
+ *                - Added in-line comments for modifications to properly
+ *                  compile with modern gcc
+ *                - Included get_avg_time() function
+ *								- Return desired values with helper functions
+ *  Website:      http://www.ping127001.com/pingpage.htm
+ *  Date:         2009 October 25
+ */
+
+/*
  *	HOW TO USE
  *
  *
@@ -31,6 +68,9 @@ int mystart = 0;			// ntransmitted - mystart = #sent
 int nsent = 0;				// #sent
 int prevrecv = 0;			// did we receive previous ping
 
+volatile sig_atomic_t keep_going = 1;
+volatile sig_atomic_t packet_loss = 0;
+
 /*
  * 			M A I N
  */
@@ -43,26 +83,20 @@ int prevrecv = 0;			// did we receive previous ping
 
 int avgPing(char *argv)
 {
-
-	int rv;
-	struct pollfd fds;
-
-
-
-
 	nreceived = 0;		// # of packets we got back
 	tmax = 0;
 	tsum = 0;				// sum of all times, for doing average
 	tavg = 0;
 
 	mytmp = 0;
+
+
 	// !!! v below v !!!
+	keep_going = 1;
+	packet_loss = 0;
 	mystart = ntransmitted;	// ntransmitted - mystart = #sent
 	nsent = ntransmitted - mystart;
 	prevrecv = 0;
-	
-	
-	
 
 	struct sockaddr_in from;
 	struct sockaddr_in *to = (struct sockaddr_in *) &whereto;
@@ -120,10 +154,14 @@ int avgPing(char *argv)
 	}
 
 	if(to->sin_family == AF_INET) {
-	/*
+	
+		printf ("\t\tcheck if host is reachable\n");
+		pinger();
+		isReachable (inet_ntoa(to->sin_addr));	
+
 		printf("PING %s (%s): %d data bytes\n", hostname,
 		  inet_ntoa(to->sin_addr), datalen);
-	*/
+	
 	/* DFM */
 	
 	} else {
@@ -137,21 +175,20 @@ int avgPing(char *argv)
 	signal( SIGINT, finish );
 	signal(SIGALRM, catcher);
 
+
 	/* fire off them quickies */
 	for(i=0; i < preload; i++) {
 		pinger();
-printf ("returned from pinger\n");
   }
 
 	if(!(pingflags & FLOOD)) {
 		catcher();	/* start things going */
-printf ("returned from catcher\n");
   }
 
-int asdf = 0;
-	for (;;) {
+	//for (;;) {
+	while (keep_going) {
 
-printf ("			for looping: %d\n", asdf++);
+if (packet_loss == 0) {
 
 		int len = sizeof (packet);
 		//int fromlen = sizeof (from);
@@ -164,53 +201,15 @@ printf ("			for looping: %d\n", asdf++);
 		timeout.tv_usec = 0;
 
 		if(pingflags & FLOOD) {
-                //printf ("pinger inside\n");
 			pinger();
-printf ("return from pinger (in for)\n");
                         /* added (fd_set *) */
 			if( select(32, (fd_set *)&fdmask, 0, 0, &timeout) == 0)
 				continue;
 		}
 
-// below
-printf ("1 + %d\n", mytmp);
-
-if (mytmp == 0) {
-if (nreceived == 0) {
-	printf ("have no received\n");
-	printf ("	sent %d\n", nsent);
-}
-
-
-
-fds.fd = s;
-fds.events = POLLIN;
-fds.revents = 0;
-
-
-rv = poll (&fds, 1, 1000);
-
-if (rv == -1) {
-	perror ("poll");
-}
-else if (rv == 0) {
-	printf ("timeout!\n");
-	break;
-
-}
-/*
-if (1 == 0) {
-
-}
-*/
-else {
-
-
 		if ((cc=recvfrom(s, packet, len, 0, 
                     /* typecasted (struct sockaddr *) */
                     (struct sockaddr *)&from, &fromlen)) < 0) {
-
-// above
 
 			if( errno == EINTR )
 				continue;
@@ -219,8 +218,7 @@ else {
 		}
 
 prevrecv = 1;
-printf ("2!\n");
-}
+
 		if (pr_pack( packet, cc, &from ) == -1) {
 			//printf ("out of sight out of mind\n");
 			return -1; // unreachable destination
@@ -230,17 +228,18 @@ printf ("2!\n");
       return get_avg_time(); // Once all pings finished
 			//finish();
     }
-}
+
+} /* packet-loss == 0 */
 else {
-	printf ("avg_time: %ld\n", get_avg_time());
-	return get_avg_time();
+	printf ("packets lost\n");
+	return -8;
 }
 
-	}
-	printf ("should never reach\n");
-	return get_avg_time();
+
+	} // while (keep_going)
+	return -5;
 	/*NOTREACHED*/
-}
+}	// end of function avgPing()
 
 int rusrs() {
 	
@@ -265,11 +264,7 @@ void catcher()
 	nsent = ntransmitted - mystart;
 
 	pinger();
-/*
-printf ("returned from pinger (in catcher)\n");
-printf ("	trans + pack = %d + %d\n", nsent, npackets);
-printf ("	prevrecv? %d\n", prevrecv);
-*/
+	
 	if (npackets == 0 || nsent < npackets) {
 		mytmp = 0;
 		alarm(1);
@@ -284,22 +279,14 @@ printf ("	prevrecv? %d\n", prevrecv);
 				waittime = MAXWAIT;
 		}
 
-		printf ("nreceived is %d\n", nreceived);
-		printf ("ntransmitted is %d\n", nsent);
-		printf ("nreceived is %d!\n", nreceived);
-		printf ("waittime! is %d\n", waittime);
-		printf ("want to return\n");
-
-		rusrs();
 		//return;
-		//signal(SIGALRM, finish);
-		//alarm(waittime);
+		signal(SIGALRM, finish);
+		alarm(waittime);
 
 		if (prevrecv == 0) {
 			printf ("this is the end\n");
 			return;
 		}
-
 		prevrecv = 0;
 		mytmp = 1;
 	}
@@ -477,17 +464,17 @@ printf ("triptime = %ld ms\n", triptime);
 
 	if(!(pingflags & QUIET)) {
 		if(pingflags != FLOOD) {
-			/*
+			/*	
 			printf("%d bytes from %s: icmp_seq=%d", cc,
 			  inet_ntoa(from->sin_addr),
 			  icp->icmp_seq );	
-			*/
+			*/	
 				/* DFM */
 			if (timing) {
 			/*
 				printf(" time=%ld ms\n", triptime );
+				printf ("avg_time: %ld\n", get_avg_time());
 			*/
-        //printf ("avg_time: %ld\n", get_avg_time());
       }
 			else
 				putchar('\n');
@@ -573,11 +560,11 @@ void finish()
         /* Added \ to form \n */
 	putchar('\n');
 	fflush(stdout);
-	/*
+	/*	
 	printf("\n----%s PING Statistics----\n", hostname );
 	printf("%d packets transmitted, ", ntransmitted );
 	printf("%d packets received, ", nreceived );
-	*/
+	*/	
 	if (nsent) {
 		if( nreceived > nsent)
 			printf("-- somebody's printing up packets!");
@@ -585,6 +572,7 @@ void finish()
 			printf("%d%% packet loss !!", 
 			  (int) ((( nsent-nreceived)*100) /
 			  nsent));
+			packetLoss();
 		}
 	}
 	printf("\n");
@@ -600,19 +588,27 @@ void finish()
 	fflush(stdout);
 
 	exit(7);
+
 }
 
 long get_avg_time() {
 
-	long mytsum = tsum / 1000; // tsum is in ms
   if (nreceived && timing) 
-    tavg = mytsum / (nreceived);
+    tavg = tsum / (nreceived);
 
+	printf ("tsum = %ld\n", tsum);
 	printf ("tavg = %ld\n", tavg);
-	printf ("mytsum = %ld\n", mytsum);
 	printf ("rcvd = %d\n", nreceived);
 
   return tavg;
 }
 
+int isReachable (char * ipAddr) {
 
+	return 1;
+}
+
+void packetLoss () {
+	printf ("packet_loss!\n");
+	packet_loss = 1;
+}
