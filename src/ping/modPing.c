@@ -51,7 +51,7 @@
 char usage[] =
 "Usage:	ping [-dfqrv] host [packetsize [count [preload]]]\n";
 
-int npackets = 10;		// amount of pings to send
+int npackets = 50;		// amount of pings to send
 int preload = 0;			// number of packets to preload
 int ntransmitted = 0;	// sequence # for outbound packets = #sent
 int ident;
@@ -66,10 +66,7 @@ long tavg = 0;
 int mytmp = 0;
 int mystart = 0;			// ntransmitted - mystart = #sent
 int nsent = 0;				// #sent
-int prevrecv = 0;			// did we receive previous ping
 
-volatile sig_atomic_t keep_going = 1;
-volatile sig_atomic_t packet_loss = 0;
 
 /*
  * 			M A I N
@@ -92,11 +89,8 @@ int avgPing(char *argv)
 
 
 	// !!! v below v !!!
-	keep_going = 1;
-	packet_loss = 0;
 	mystart = ntransmitted;	// ntransmitted - mystart = #sent
 	nsent = ntransmitted - mystart;
-	prevrecv = 0;
 
 	struct sockaddr_in from;
 	struct sockaddr_in *to = (struct sockaddr_in *) &whereto;
@@ -155,10 +149,6 @@ int avgPing(char *argv)
 
 	if(to->sin_family == AF_INET) {
 	
-		printf ("\t\tcheck if host is reachable\n");
-		pinger();
-		isReachable (inet_ntoa(to->sin_addr));	
-
 		printf("PING %s (%s): %d data bytes\n", hostname,
 		  inet_ntoa(to->sin_addr), datalen);
 	
@@ -182,13 +172,22 @@ int avgPing(char *argv)
   }
 
 	if(!(pingflags & FLOOD)) {
-		catcher();	/* start things going */
+	//	catcher();	/* start things going */
   }
 
-	//for (;;) {
-	while (keep_going) {
 
-if (packet_loss == 0) {
+	// Added to send pings manually via flood method, not catcher() above
+	int j;
+	for (j = 0; j < npackets; j++) {
+
+		if (j == npackets/10) {
+			if (nreceived) {
+				continue;
+			}
+			else {
+				goto exitout;
+			}
+		}
 
 		int len = sizeof (packet);
 		//int fromlen = sizeof (from);
@@ -200,12 +199,10 @@ if (packet_loss == 0) {
 		timeout.tv_sec = 3;
 		timeout.tv_usec = 0;
 
-		if(pingflags & FLOOD) {
-			pinger();
-                        /* added (fd_set *) */
-			if( select(32, (fd_set *)&fdmask, 0, 0, &timeout) == 0)
-				continue;
-		}
+		pinger();
+                    /* added (fd_set *) */
+		if( select(32, (fd_set *)&fdmask, 0, 0, &timeout) == 0)
+			continue;
 
 		if ((cc=recvfrom(s, packet, len, 0, 
                     /* typecasted (struct sockaddr *) */
@@ -217,8 +214,6 @@ if (packet_loss == 0) {
 			continue;
 		}
 
-prevrecv = 1;
-
 		if (pr_pack( packet, cc, &from ) == -1) {
 			//printf ("out of sight out of mind\n");
 			return -1; // unreachable destination
@@ -229,17 +224,12 @@ prevrecv = 1;
 			//finish();
     }
 
-} /* packet-loss == 0 */
-else {
-	printf ("packets lost\n");
-	return -8;
-}
+	} // end of for (npackets)
 
+exitout:
+	return get_avg_time();
+}// end of function avgPing()
 
-	} // while (keep_going)
-	return -5;
-	/*NOTREACHED*/
-}	// end of function avgPing()
 
 int rusrs() {
 	
@@ -279,16 +269,8 @@ void catcher()
 				waittime = MAXWAIT;
 		}
 
-		//return;
 		signal(SIGALRM, finish);
 		alarm(waittime);
-
-		if (prevrecv == 0) {
-			printf ("this is the end\n");
-			return;
-		}
-		prevrecv = 0;
-		mytmp = 1;
 	}
 }
 
@@ -455,7 +437,7 @@ printf ("pr_pack unreachable\n");
 		triptime = tv.tv_sec*1000
                             +(tv.tv_usec/1000);
 		tsum += triptime;
-printf ("triptime = %ld ms\n", triptime);
+//printf ("triptime = %ld ms\n", triptime);
 		if( triptime < tmin )
 			tmin = triptime;
 		if( triptime > tmax )
@@ -572,7 +554,7 @@ void finish()
 			printf("%d%% packet loss !!", 
 			  (int) ((( nsent-nreceived)*100) /
 			  nsent));
-			packetLoss();
+			printf ("asdf?\n");	
 		}
 	}
 	printf("\n");
@@ -603,12 +585,3 @@ long get_avg_time() {
   return tavg;
 }
 
-int isReachable (char * ipAddr) {
-
-	return 1;
-}
-
-void packetLoss () {
-	printf ("packet_loss!\n");
-	packet_loss = 1;
-}
