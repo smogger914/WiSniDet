@@ -10,6 +10,7 @@ int main(int argc, char *argv[])
 
     pcap_t *handle;                          /* Session handle */
     char dev[] = "wlan0";                       /* Device to sniff on */
+   // char *dev;
     char errbuf[PCAP_ERRBUF_SIZE];    /* Error string */
     struct bpf_program filter;              /* The compiled filter expression */
     char filter_app[] = "port 23";          /* The filter expression */
@@ -19,9 +20,14 @@ int main(int argc, char *argv[])
   //  struct pcap_pkthdr header;
 
 
+ //   dev = pcap_lookupdev(errbuf);
+    if (dev == NULL) {
+	fprintf(stderr, "Couldn't find default device: %s\n", errbuf);
+	return(2);
+    }
 
-
-    handle = pcap_open_live(dev, BUFSIZ, 1, 0, errbuf);
+    
+ handle = pcap_open_live(dev, BUFSIZ, 1, 0, errbuf);
  //   pcap_compile(handle, &filter, filter_app, 0, net);
  //   pcap_setfilter(handle, &filter);
     pcap_lookupnet(dev, &net, &mask, errbuf);
