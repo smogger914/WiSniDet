@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 
 PROJECT(seniordesign C)
-ADD_DEFINITIONS (-Wall -g)
+ADD_DEFINITIONS (-Wall -g -lpcap)
 
 ADD_SUBDIRECTORY (src)
 ADD_SUBDIRECTORY (include)

@@ -231,12 +231,6 @@ exitout:
 }// end of function avgPing()
 
 
-int rusrs() {
-	
-	printf ("r u srs\n");
-	return 1;
-}
-
 /*
  * 			C A T C H E R
  * 
