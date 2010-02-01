@@ -131,9 +131,9 @@ u_int16_t handle_ethernet (u_char *args, const struct pcap_pkthdr * pkthdr,
   // Start with ether header
   eptr = (struct ether_header *) packet;
 
-  fprintf (stdout, "eth_hdr source: %s\n",
+  fprintf (stdout, "eth_hdr source: %d\n",
           ether_ntoa ((const struct ether_addr *)&eptr->ether_shost));
-  fprintf (stdout, "eth_hdr destin: %s\n\n",
+  fprintf (stdout, "eth_hdr destin: %d\n\n",
           ether_ntoa ((const struct ether_addr *)&eptr->ether_dhost));
 
   // Have IP packet?
@@ -181,7 +181,7 @@ int openAndRead (pcap_if_t * dev) {
   // Open device listening
   descr = pcap_open_live (dev->name, MAXBYTES2CAPTURE, 1, 512, errbuf);
   if (descr == NULL) {
-    fprintf (stderr, "pcap_open_live() %s: %s\n", dev, errbuf);
+   // fprintf (stderr, "pcap_open_live() %s: %s\n", dev, errbuf);
     return 2;
   }
   
