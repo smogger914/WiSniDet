@@ -1,0 +1,27 @@
+FOCUS
+    Firstly, to find disgruntled employees running sniffers on their machine.
+
+1.  Send a request [ICMP] with the following:
+      a. destination IP address of a suspect machine
+      b. wrong destination MAC address
+    What this does:
+      NIC in promiscuous mode will pass this request
+      Suspect machine will reply
+      NIC in non-promisc mode will drop this packet
+
+2.  Write a host based detection system to do the following:
+      a. Look for a local NIC in promiscuous mode
+      b. Verify incoming packets are only destined for the local MACs
+      c. Check exorbitant amount of network traffic/CPU activity
+      d. Rate of packet loss is unusually high
+    If any of the above found:
+      a. Notify the sysadmin
+      b. Send mail to sysadmin notifying him of discovery
+
+3.  DNS test that does the following:
+      a. Build DNS packet with invalid IP as source/dest
+      b. Inject packet
+      c. Sniff network for DNS lookups on those IPs
+ 
+
+
