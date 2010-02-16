@@ -23,5 +23,11 @@ FOCUS
       b. Inject packet
       c. Sniff network for DNS lookups on those IPs
  
+4.  MAC comparison with a whitelist
+      a. Every access point knows the MACs associated with itself
+      b. Every access point shares a global whitelist
+      c. Compare associated MACs with whitelisted MACs
+
+5.  Ping
 
 
