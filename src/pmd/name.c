@@ -3,7 +3,7 @@
 # include <stdio.h>
 # include <arpa/inet.h>
 
-//# include "iwlib.h"
+# include "iwlib.h"
 # include "wireless.h"
 //# include <net/if.h>
 
@@ -11,14 +11,17 @@
 # include <stdlib.h>
 # include <string.h>
 
-static inline int iw_get_ext (int             skfd,
-                              const char *    ifname,
-                              int             request,
-                              struct iwreq *  pwrq) {
-
-  strncpy (pwrq->ifr_name, ifname, IFNAMSIZ);
-  return (ioctl (skfd, request, pwrq));
-}
+/*
+ *  This array is from iwlib.c
+ */
+const char * const iw_operation_mode[] = { "Auto",
+                                        "Ad-Hoc",
+                                        "Managed",
+                                        "Master",
+                                        "Repeater",
+                                        "Secondary",
+                                        "Monitor",
+                                        "Unknown/bug" };
 
 int main () {
 
@@ -109,6 +112,15 @@ int main () {
       fprintf (stdout, "%s:\tLOLOLOL\n", ifr.ifr_name);
     }
 
+    wireless_config info;
+    if (iw_get_ext (s, ifr.ifr_name, SIOCGIWMODE, &iwr) >= 0) {
+      info.has_mode = 1;
+      if (iwr.u.mode < IW_NUM_OPER_MODE)
+        info.mode = iwr.u.mode;
+      else
+        info.mode = IW_NUM_OPER_MODE;
+    }
+    printf ("Mode: %s\n", iw_operation_mode[info.mode]);
 
   }
     
