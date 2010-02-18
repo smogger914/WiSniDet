@@ -1,18 +1,31 @@
 # include <sys/ioctl.h>
-# include <net/if.h>
 # include <netinet/in.h>
 # include <stdio.h>
 # include <arpa/inet.h>
 
+//# include "iwlib.h"
+# include "wireless.h"
+//# include <net/if.h>
+
 # include <unistd.h>
 # include <stdlib.h>
 # include <string.h>
+
+static inline int iw_get_ext (int             skfd,
+                              const char *    ifname,
+                              int             request,
+                              struct iwreq *  pwrq) {
+
+  strncpy (pwrq->ifr_name, ifname, IFNAMSIZ);
+  return (ioctl (skfd, request, pwrq));
+}
 
 int main () {
 
   char              buf[1024];
   struct ifconf     ifc;
   struct ifreq      ifr;
+  struct iwreq      iwr;
   int               s;
   int               nInterfaces;
   int               i;
@@ -43,26 +56,10 @@ int main () {
       continue;
     }
     if (! (ifr.ifr_flags & IFF_UP)) {
-      fprintf (stdout, "%s: IFFUP!!!\n", ifr.ifr_name);
+      fprintf (stdout, "%s: y u down, charlie brown?\n", ifr.ifr_name);
       continue;
     }
 
-    if (ifr.ifr_flags & IFF_LOOPBACK) {
-      fprintf (stdout, "%s:\t1111111\n", ifr.ifr_name);
-    }
-    
-    if (ifr.ifr_flags & IFF_UP) {
-      fprintf (stdout, "%s:\tUPUPUPUPUPU\n", ifr.ifr_name);
-    }
-
-    if (ifr.ifr_flags & IFF_RUNNING) {
-      fprintf (stdout, "%s:\tRUN\n", ifr.ifr_name);
-    }
-
-    if (ifr.ifr_flags & IFF_BROADCAST) {
-      fprintf (stdout, "%s:\tBROADCAST\n", ifr.ifr_name);
-    }
-    
     if (ifr.ifr_flags & IFF_ALLMULTI) {
       fprintf (stdout, "%s:\tLRRRRROLOLOL\n", ifr.ifr_name);
     }
@@ -71,10 +68,47 @@ int main () {
       fprintf (stdout, "%s:\tLOLOLOL\n", ifr.ifr_name);
     }
 
+/*
     if (ioctl (s, SIOCGIFADDR, &ifr) == -1) {
       fprintf (stderr, "ioctl(SIOCGIFADDR) , %s\n", ifr.ifr_name);
       continue;
     }
+*/
+    /*
+     *  wireless.h
+     */
+
+    if (iw_get_ext (s, ifr.ifr_name, SIOCGIWMODE, &iwr)  == -1) {
+      fprintf (stderr, "ioctl(SIOCGIWMODE) , %s\n", ifr.ifr_name);
+      continue;
+    }
+
+    if (iwr.u.mode & IW_MODE_MONITOR) {
+      fprintf (stderr, "%s:\tMONITOR\n", ifr.ifr_name);
+    }
+    if (iwr.u.mode & IW_MODE_AUTO) {
+      fprintf (stderr, "%s:\tAUTO\n", ifr.ifr_name);
+    }
+    if (iwr.u.mode & IW_MODE_ADHOC) {
+      fprintf (stderr, "%s:\tADHOC\n", ifr.ifr_name);
+    }
+    if (iwr.u.mode & IW_MODE_INFRA) {
+      fprintf (stderr, "%s:\tINFRA\n", ifr.ifr_name);
+    }
+    if (iwr.u.mode & IW_MODE_MASTER) {
+      fprintf (stderr, "%s:\tMASTER\n", ifr.ifr_name);
+    }
+    if (iwr.u.mode & IW_MODE_REPEAT) {
+      fprintf (stderr, "%s:\tREPEAT\n", ifr.ifr_name);
+    }
+    if (iwr.u.mode & IW_MODE_SECOND) {
+      fprintf (stderr, "%s:\tSECOND\n", ifr.ifr_name);
+    }
+    
+    if (ifr.ifr_flags & IW_MODE_MONITOR) {
+      fprintf (stdout, "%s:\tLOLOLOL\n", ifr.ifr_name);
+    }
+
 
   }
     
