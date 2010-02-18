@@ -23,15 +23,25 @@ const char * const iw_operation_mode[] = { "Auto",
                                         "Monitor",
                                         "Unknown/bug" };
 
-int main () {
+/*
+ *  Name:         isPromiscMonitor
+ *  Description:  Checks to see if any NIC is in promiscuous
+ *                or monitor mode.
+ *  Return:       >0    True, there exists at least 1 card in promisc/monitor
+ *                0     False
+ */
 
-  char              buf[1024];
-  struct ifconf     ifc;
-  struct ifreq      ifr;
-  struct iwreq      iwr;
-  int               s;
-  int               nInterfaces;
-  int               i;
+int isPromiscMonitor() {
+
+  char                    buf[1024];
+  struct ifconf           ifc;
+  struct ifreq            ifr;
+  struct iwreq            iwr;
+  struct wireless_config  info;
+  int                     s;
+  int                     nInterfaces;
+  int                     i;
+  int                     retVal = 0;
 
   /* Get a socket handle */
   s = socket (AF_INET, SOCK_DGRAM, 0);
@@ -44,7 +54,6 @@ int main () {
   ifc.ifc_len = sizeof(buf);
   ifc.ifc_buf = buf;
   if (ioctl (s, SIOCGIFCONF, &ifc) < 0) {
-//  if (ioctl (s, SIOCGIFNAME, &ifc) < 0) {
     perror ("ioctl(SIOCIFCONF)");
     return 1;
   }
@@ -62,67 +71,39 @@ int main () {
       fprintf (stdout, "%s: y u down, charlie brown?\n", ifr.ifr_name);
       continue;
     }
-
+    // ALLMULTI flag bit set
     if (ifr.ifr_flags & IFF_ALLMULTI) {
-      fprintf (stdout, "%s:\tLRRRRROLOLOL\n", ifr.ifr_name);
+      //fprintf (stdout, "%s:\tALLMULTI\n", ifr.ifr_name);
+      retVal = 1;
     }
-    
+    // PROMISC flag bit set 
     if (ifr.ifr_flags & IFF_PROMISC) {
-      fprintf (stdout, "%s:\tLOLOLOL\n", ifr.ifr_name);
-    }
-
-/*
-    if (ioctl (s, SIOCGIFADDR, &ifr) == -1) {
-      fprintf (stderr, "ioctl(SIOCGIFADDR) , %s\n", ifr.ifr_name);
-      continue;
-    }
-*/
-    /*
-     *  wireless.h
-     */
-
-    if (iw_get_ext (s, ifr.ifr_name, SIOCGIWMODE, &iwr)  == -1) {
-      fprintf (stderr, "ioctl(SIOCGIWMODE) , %s\n", ifr.ifr_name);
-      continue;
-    }
-
-    if (iwr.u.mode & IW_MODE_MONITOR) {
-      fprintf (stderr, "%s:\tMONITOR\n", ifr.ifr_name);
-    }
-    if (iwr.u.mode & IW_MODE_AUTO) {
-      fprintf (stderr, "%s:\tAUTO\n", ifr.ifr_name);
-    }
-    if (iwr.u.mode & IW_MODE_ADHOC) {
-      fprintf (stderr, "%s:\tADHOC\n", ifr.ifr_name);
-    }
-    if (iwr.u.mode & IW_MODE_INFRA) {
-      fprintf (stderr, "%s:\tINFRA\n", ifr.ifr_name);
-    }
-    if (iwr.u.mode & IW_MODE_MASTER) {
-      fprintf (stderr, "%s:\tMASTER\n", ifr.ifr_name);
-    }
-    if (iwr.u.mode & IW_MODE_REPEAT) {
-      fprintf (stderr, "%s:\tREPEAT\n", ifr.ifr_name);
-    }
-    if (iwr.u.mode & IW_MODE_SECOND) {
-      fprintf (stderr, "%s:\tSECOND\n", ifr.ifr_name);
+      //fprintf (stdout, "%s:\tPROMISC\n", ifr.ifr_name);
+      retVal = 2;
     }
     
-    if (ifr.ifr_flags & IW_MODE_MONITOR) {
-      fprintf (stdout, "%s:\tLOLOLOL\n", ifr.ifr_name);
-    }
-
-    wireless_config info;
     if (iw_get_ext (s, ifr.ifr_name, SIOCGIWMODE, &iwr) >= 0) {
       info.has_mode = 1;
       if (iwr.u.mode < IW_NUM_OPER_MODE)
         info.mode = iwr.u.mode;
       else
         info.mode = IW_NUM_OPER_MODE;
-    }
-    printf ("Mode: %s\n", iw_operation_mode[info.mode]);
-
-  }
+      //printf ("Mode: %s\n", iw_operation_mode[info.mode]);
+      //printf ("Monitor is %d\n", info.mode);
+      if (info.mode == 6) { /* Monitor mode */
+        retVal = 3; 
+      } /* IF */
+    } /* IF */
+  } /* FOR */
     
+  return retVal;
+
+}
+
+int main () {
+
+  int retVal = 0;
+  retVal = isPromiscMonitor();
+  printf ("Result: %d\n", retVal);
   return 0;
 }
