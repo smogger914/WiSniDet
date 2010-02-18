@@ -3,9 +3,7 @@
 # include <stdio.h>
 # include <arpa/inet.h>
 
-# include "iwlib.h"
-# include "wireless.h"
-//# include <net/if.h>
+# include "pmd.h"
 
 # include <unistd.h>
 # include <stdlib.h>
