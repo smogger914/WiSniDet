@@ -30,7 +30,7 @@ FILE * getLoadFile(){
 */
 int getCpuLoad(FILE *f, int t){
 	float load;
-	char temp[4];
+	char temp[BUFSIZE];
 	if(f == NULL){
 		printf("file not found\n");
 	}
