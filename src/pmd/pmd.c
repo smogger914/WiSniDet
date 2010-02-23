@@ -29,7 +29,7 @@ const char * const iw_operation_mode[] = { "Auto",
  *                0     False
  */
 
-int isPromiscMonitor() {
+extern int isPromiscMonitor() {
 
   char                    buf[1024];
   struct ifconf           ifc;
@@ -37,7 +37,6 @@ int isPromiscMonitor() {
   struct iwreq            iwr;
   struct wireless_config  info;
   int                     s;
-  int                     nInterfaces;
   int                     i;
   int                     retVal = 0;
 
@@ -72,11 +71,13 @@ int isPromiscMonitor() {
     // ALLMULTI flag bit set
     if (ifr.ifr_flags & IFF_ALLMULTI) {
       //fprintf (stdout, "%s:\tALLMULTI\n", ifr.ifr_name);
+      printf ("ALL_MULTI found\n");
       retVal = 1;
     }
     // PROMISC flag bit set 
     if (ifr.ifr_flags & IFF_PROMISC) {
       //fprintf (stdout, "%s:\tPROMISC\n", ifr.ifr_name);
+      printf ("PROMISC found\n");
       retVal = 2;
     }
     
@@ -89,15 +90,20 @@ int isPromiscMonitor() {
       //printf ("Mode: %s\n", iw_operation_mode[info.mode]);
       //printf ("Monitor is %d\n", info.mode);
       if (info.mode == 6) { /* Monitor mode */
+        printf ("Monitor mode found\n");
         retVal = 3; 
       } /* IF */
     } /* IF */
   } /* FOR */
     
+  if (s) {
+    close (s);
+  }
   return retVal;
 
 }
 
+/*
 int main () {
 
   int retVal = 0;
@@ -105,3 +111,4 @@ int main () {
   printf ("Result: %d\n", retVal);
   return 0;
 }
+*/

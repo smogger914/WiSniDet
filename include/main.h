@@ -5,15 +5,20 @@
 # include <stdlib.h>
 # include <stdio.h>
 
+# include <sys/stat.h>
+# include <errno.h>
 # include <signal.h>
+# include <unistd.h>
 
+# include <arpa/inet.h>
 
-# include "dataTable.h"
-# include "modPing.h"
+# include "pmd.h"
 
-int checkIPv4 (char *);
-int ip4StrRange (char *, char *);
-int ip4NumRange (int, int, int, int, int, int, int, int);
+# define SERVER_IP    "129.210.16.41"
+# define SERVER_PORT  5316 
+# define BUFFER_SIZE  1000
+
 void sighandler (int);
+int notifyController();
 
 #endif
