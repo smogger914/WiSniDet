@@ -5,15 +5,23 @@
 # include <stdlib.h>
 # include <stdio.h>
 
+# include <sys/stat.h>
+# include <errno.h>
 # include <signal.h>
+# include <unistd.h>
 
+# include <arpa/inet.h>
 
-# include "dataTable.h"
-# include "modPing.h"
+# include "pmd.h"
+# include "cpumon.h"
 
-int checkIPv4 (char *);
-int ip4StrRange (char *, char *);
-int ip4NumRange (int, int, int, int, int, int, int, int);
+# define CONFIG_FILE  "/tmp/pmdconf"
+//# define SERVER_IP    "129.210.238.102"
+# define SERVER_PORT  "5316" 
+# define BUFFER_SIZE  100
+
+int ipFromFile (char *);
 void sighandler (int);
+int notifyController(int, char *);
 
 #endif
