@@ -13,12 +13,15 @@
 # include <arpa/inet.h>
 
 # include "pmd.h"
+# include "cpumon.h"
 
-# define SERVER_IP    "129.210.16.41"
-# define SERVER_PORT  5316 
-# define BUFFER_SIZE  1000
+# define CONFIG_FILE  "/tmp/pmdconf"
+//# define SERVER_IP    "129.210.238.102"
+# define SERVER_PORT  "5316" 
+# define BUFFER_SIZE  100
 
+int ipFromFile (char *);
 void sighandler (int);
-int notifyController();
+int notifyController(int, char *);
 
 #endif

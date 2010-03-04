@@ -1,12 +1,4 @@
-#include <stdio.h>
-#include <string.h>
- 
-#define BUFSIZE 15
-#define TEMPSIZE 5
-#define TENMIN 1
-#define FIVEMIN 2
-#define ONEMIN 3
- 
+# include "cpumon.h"
 
 /* convertToD
 * converts an input string to a double
@@ -15,8 +7,8 @@ float convertToD(char c[TEMPSIZE]){
 	float d;
 	int i;
 	float temp;
-   int nDecimalDigits;
-
+        int nDecimalDigits;
+printf ("%s\n", c);
 	nDecimalDigits = 1;
 
 	for(i = 0; i < strlen(c); i ++){
@@ -82,7 +74,7 @@ int seperateString(char * c, int timeInt){
 	}
 	//printf("load: %f\n", load);
 
-	return load;
+	return (int)(load * 100);
 }
 /* loadFile
 * returns a file given an input string
@@ -98,30 +90,21 @@ return fopen("/proc/loadavg","r");
 int getCpuLoad(FILE *f, int t){
 
 	float load;
-	char * temp;
-	int c;
 	if(f == NULL){
 		printf("file not found\n");
 	}
 	char cpuload[BUFSIZE];
 	fgets(cpuload, BUFSIZE,f);
 
- 	seperateString(cpuload, 1);
+ 	load = seperateString(cpuload, 1);
 	
-
 	return load;
 }
-/* main
-* creates file
-* getCpuLoad
-*
-*/
-void main(void){
+
+extern int cpuTen (void){
  
 	FILE * f;
-	char cpuload[BUFSIZE];
 	f = getLoadFile();
-	getCpuLoad(f,TENMIN);
- 	
+	int retVal = getCpuLoad(f,TENMIN);
+        return retVal;	
 }
-

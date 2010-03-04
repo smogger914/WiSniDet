@@ -1,39 +1,70 @@
 # include "main.h"
 
-int notifyController() {
+int ipFromFile(char * ip) {
 
-  struct sockaddr_in sin;
-  int s;
-  int len;
-  char str[BUFFER_SIZE] = "hello\n";
+  FILE * fd;
 
-  /* Build address data structure */
-  bzero ((char*) &sin, sizeof(sin));
-  sin.sin_family = AF_INET;
-  inet_pton (sin.sin_family, SERVER_IP, &(sin.sin_addr));
-  sin.sin_port = htons(SERVER_PORT);
-  len = sizeof (sin); 
+  fd = fopen(CONFIG_FILE, "r");
 
-  /* Active open */
-  if ((s = socket (AF_INET, SOCK_DGRAM, 0)) < 0) {
-    perror ("notifyController [socket]");
+  if (fgets (ip, BUFFER_SIZE, fd) == NULL) {
+    fprintf (stderr, "Config file empty\n");
+    exit(1);
+  }
+  if (ip[strlen(ip)-1] == '\n')
+    ip[strlen(ip)-1] = '\0';
+
+  fclose (fd);
+  return 0;
+}
+
+int notifyController(int yesno, char * SERVER_IP) {
+
+  int sockfd;
+  struct addrinfo hints, *servinfo, *p;
+  int rv;
+  int numbytes;
+  char buf[BUFFER_SIZE];
+
+  if (yesno == 1) {
+    strncpy (buf, "1234567890", sizeof(buf));
+  }
+  else {
+    strncpy (buf, "123", sizeof(buf));
+  }
+
+  memset (&hints, 0, sizeof (hints));
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_DGRAM;
+
+  if ( (rv = getaddrinfo(SERVER_IP, SERVER_PORT, &hints, &servinfo)) != 0) {
+    perror ("notifyController [getaddrinfo]");
+    return 1;
+  }
+
+  for (p = servinfo; p != NULL; p = p->ai_next) {
+    if ((sockfd = socket (p->ai_family, p->ai_socktype,
+                          p->ai_protocol)) == -1) {
+      perror ("notifyController [socket]");
+      continue;
+    }
+    break;
+  }
+
+  if (p == NULL) {
+    fprintf (stderr, "Client: Failed to bind socket\n");
+    return 2;
+  }
+
+  if ((numbytes = sendto (sockfd, buf, strlen(buf), 0, p->ai_addr,
+                          p->ai_addrlen)) == -1) {
+    perror ("talker: sendto");
     exit (1);
   }
-  if (connect (s, (struct sockaddr *)&sin, sizeof(sin)) < 0) {
-    perror ("notifyController [connect]");
-    close (s);
-    exit (1);
-  }
 
-  /* Construct message */
-  printf ("%s  ^ the string\n", str);
-  
-  /* Sending */
-  ssize_t n = sendto (s, str, BUFFER_SIZE, 0,
-                      (struct sockaddr *)&sin, len);
-  if (n < 0) {
-    printf ("sending error!");
-  }
+  freeaddrinfo(servinfo);
+
+  //printf ("talker: sent %d bytes to %s\n", numbytes, SERVER_IP);
+  close (sockfd);
 
   return 0;
 }
@@ -56,15 +87,21 @@ int main () {
   if ((chdir("/")) < 0) 
     exit (EXIT_FAILURE);
 
+
+  char ip[BUFFER_SIZE];
+  ipFromFile(ip);
+  printf ("1ce moar: %s\n", ip);
   /* The processing */
   while (1) {
 
     s = isPromiscMonitor();
     if (s) {
-      notifyController();
-      break;
+      notifyController(1, ip);
     }
-    sleep(15);
+    else {
+      notifyController(0, ip);
+    }
+    sleep(5);
 
   }
   

@@ -8,6 +8,7 @@ ADD_SUBDIRECTORY (include)
 
 SET(SOURCES	
 						src/pmd/pmd.c
+						src/cpumon/cpumon.c
 						src/main/main.c
 						)
 
