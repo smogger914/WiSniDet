@@ -32,6 +32,7 @@ public class WiSniGUIView extends FrameView implements Runnable {
     WiSniServer ws;
     LinkedList clientList;
     LinkedList listAllPromisc = new LinkedList();
+    LinkedList listAllPromiscPrev = new LinkedList();
     LinkedList listAllPromiscFormatted = new LinkedList();
     DefaultListModel listModel =  new DefaultListModel();;
     
@@ -57,17 +58,25 @@ public class WiSniGUIView extends FrameView implements Runnable {
                 listMessagePromisc.addFirst(ipAddr);
                 String ipAddrFormatted = ipAddr + " [" + now + "]";
                 
+                /* Maintain a list of those that were removed from last iteration */
+                if (listAllPromiscPrev.contains(ipAddr) == false) {
+                    listAllPromisc.remove(ipAddr);
+                }    
+                
                 /* Add to more permanent list */
                 if (listAllPromisc.contains(ipAddr) == false) {
                     listAllPromisc.addFirst(ipAddr);
                     listAllPromiscFormatted.addFirst(ipAddrFormatted);
                 }
+                
             }
 
         }
         
+        listAllPromiscPrev = (LinkedList) listMessagePromisc.clone();
         Object[] allPromisc = listAllPromiscFormatted.toArray();
         java.util.Arrays.sort(allPromisc);
+        
         jList1.setListData(listMessageActive.toArray());
         jList2.setListData(listMessagePromisc.toArray());
         jList3.setListData(allPromisc);
@@ -189,7 +198,7 @@ public class WiSniGUIView extends FrameView implements Runnable {
         jList1.setMaximumSize(new java.awt.Dimension(40, 80));
         jList1.setMinimumSize(new java.awt.Dimension(40, 80));
         jList1.setName("jList1"); // NOI18N
-        jList1.setPreferredSize(new java.awt.Dimension(40, 85));
+        jList1.setPreferredSize(new java.awt.Dimension(40, 80));
         jScrollPane1.setViewportView(jList1);
 
         jLabel1.setFont(resourceMap.getFont("jLabel1.font")); // NOI18N
@@ -262,29 +271,30 @@ public class WiSniGUIView extends FrameView implements Runnable {
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jScrollPane1)
                     .addComponent(jTextField1)
                     .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1)
                     .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(18, 18, 18)
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jButton1)
+                        .addComponent(jLabel5))
                     .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jButton1)
-                            .addComponent(jLabel5))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton2))
-                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addGap(12, 12, 12)
                         .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(mainPanelLayout.createSequentialGroup()
-                                .addComponent(jLabel3)
-                                .addGap(80, 80, 80))
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 329, Short.MAX_VALUE))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 192, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 403, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, mainPanelLayout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 299, Short.MAX_VALUE)
+                        .addComponent(jButton2))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, mainPanelLayout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addGap(80, 80, 80)))
+                .addContainerGap())
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -292,14 +302,14 @@ public class WiSniGUIView extends FrameView implements Runnable {
                 .addContainerGap()
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel3))
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 209, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 209, Short.MAX_VALUE)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 209, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(jLabel5))
@@ -319,6 +329,11 @@ public class WiSniGUIView extends FrameView implements Runnable {
         javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(wisnigui.WiSniGUIApp.class).getContext().getActionMap(WiSniGUIView.class, this);
         exitMenuItem.setAction(actionMap.get("quit")); // NOI18N
         exitMenuItem.setName("exitMenuItem"); // NOI18N
+        exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exitMenuItemActionPerformed(evt);
+            }
+        });
         fileMenu.add(exitMenuItem);
 
         menuBar.add(fileMenu);
@@ -351,11 +366,11 @@ public class WiSniGUIView extends FrameView implements Runnable {
                 .addGap(291, 291, 291)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE))
+                .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 429, Short.MAX_VALUE))
             .addGroup(statusPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(statusMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 770, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 850, Short.MAX_VALUE)
                 .addComponent(statusAnimationLabel)
                 .addContainerGap())
         );
@@ -387,15 +402,19 @@ public class WiSniGUIView extends FrameView implements Runnable {
  */
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        System.out.println("Clickety");
+        
+        if (jButton2.getText().equals("Start Server")) {
+           listUpdater = new Thread(new WiSniServer());
+           listUpdater.start();
 
-       listUpdater = new Thread(new WiSniServer());
-       listUpdater.start();
-
-        wt = new Thread(this);
-        wt.start();
-        System.out.println("making new thread");
-
+            wt = new Thread(this);
+            wt.start();
+            System.out.println("making new thread");
+        jButton2.setText("Stop Server");
+        }
+        else {
+            
+        }
       
       
 
@@ -405,6 +424,10 @@ public class WiSniGUIView extends FrameView implements Runnable {
         // TODO add your handling code here:
         
     }//GEN-LAST:event_formPropertyChange
+
+    private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuItemActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_exitMenuItemActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
