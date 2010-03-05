@@ -71,13 +71,11 @@ extern int isPromiscMonitor() {
     // ALLMULTI flag bit set
     if (ifr.ifr_flags & IFF_ALLMULTI) {
       //fprintf (stdout, "%s:\tALLMULTI\n", ifr.ifr_name);
-      printf ("ALL_MULTI found\n");
       retVal = 1;
     }
     // PROMISC flag bit set 
     if (ifr.ifr_flags & IFF_PROMISC) {
       //fprintf (stdout, "%s:\tPROMISC\n", ifr.ifr_name);
-      printf ("PROMISC found\n");
       retVal = 2;
     }
     
@@ -90,7 +88,6 @@ extern int isPromiscMonitor() {
       //printf ("Mode: %s\n", iw_operation_mode[info.mode]);
       //printf ("Monitor is %d\n", info.mode);
       if (info.mode == 6) { /* Monitor mode */
-        printf ("Monitor mode found\n");
         retVal = 3; 
       } /* IF */
     } /* IF */

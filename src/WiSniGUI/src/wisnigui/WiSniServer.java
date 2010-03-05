@@ -26,7 +26,7 @@ DatagramSocket aSocket;
                                // System.out.println("got one");
                                 //System.out.println(request.getAddress());
                                 //System.out.println(request.getLength());
-                                addClientToList(request.getAddress());
+                                addClientToList(request);
 				//DatagramPacket reply = new DatagramPacket(d.getData(), d
 				//.getLength(), request.getAddress(), request.getPort());
 				//aSocket.send(reply);
@@ -46,12 +46,11 @@ DatagramSocket aSocket;
         /*
          *adds client IP to the list of clients
          */
-        public static void addClientToList(java.net.InetAddress d){
+        public static void addClientToList(DatagramPacket d){
            // System.out.println(d);
             //String temp;
             //temp = d.getHostName();
-
-            clientList.add(d.getHostAddress());
+            clientList.add(d);
         }
         /*
          * returns the LinkedList of clients

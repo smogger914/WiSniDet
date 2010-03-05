@@ -12,6 +12,8 @@ import org.jdesktop.application.FrameView;
 import org.jdesktop.application.TaskMonitor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.DatagramPacket;
+import java.util.Calendar;
 import javax.swing.Timer;
 import javax.swing.Icon;
 import javax.swing.JDialog;
@@ -29,39 +31,47 @@ public class WiSniGUIView extends FrameView implements Runnable {
     Thread wt;
     WiSniServer ws;
     LinkedList clientList;
-    String[] listMessage = new String[10000];
+    LinkedList listAllPromisc = new LinkedList();
+    LinkedList listAllPromiscFormatted = new LinkedList();
     DefaultListModel listModel =  new DefaultListModel();;
+    
     /*
      * updateLists takes a linkedlist and updates
      * the lists with the client Information
      */
     public void updateLists(LinkedList cL){
-        int counter = 0;
-        java.net.InetAddress temp;
-           
-         //  System.out.println("in Update");
+        LinkedList listMessageActive = new LinkedList();
+        LinkedList listMessagePromisc = new LinkedList();
+        String ipAddr;
+        Calendar calendar = Calendar.getInstance();
+        java.util.Date now;
+        
+        while(cL.isEmpty() == false){
+            DatagramPacket dp = (DatagramPacket) cL.removeFirst();
+            ipAddr = dp.getAddress().getHostAddress();
+            listMessageActive.addFirst(ipAddr);
             
-                //System.out.println("cl =" + cL.peekFirst());
-            
-counter = 0;
-                while(cL.isEmpty() == false){
-                 listMessage[counter] = (String)cL.removeFirst();
+            /* Check for promisc mode now */
+            if (dp.getLength() == 10) {
+                now = calendar.getTime();
+                listMessagePromisc.addFirst(ipAddr);
+                String ipAddrFormatted = ipAddr + " [" + now + "]";
                 
-               // cL.addFirst("hello");
-               // jList1.setListData(listMessage);
-                counter++;
+                /* Add to more permanent list */
+                if (listAllPromisc.contains(ipAddr) == false) {
+                    listAllPromisc.addFirst(ipAddr);
+                    listAllPromiscFormatted.addFirst(ipAddrFormatted);
                 }
-                
-                
-            
-           
-           // 
-           // listMessage[0] = "hello";
-           // listMessage[1] = "hi";
-           // hi[] = "bye";
-          jList1.setListData(listMessage);
+            }
 
-            
+        }
+        
+        Object[] allPromisc = listAllPromiscFormatted.toArray();
+        java.util.Arrays.sort(allPromisc);
+        jList1.setListData(listMessageActive.toArray());
+        jList2.setListData(listMessagePromisc.toArray());
+        jList3.setListData(allPromisc);
+        
     }
     /*
      * the run method for the string
@@ -89,6 +99,7 @@ counter = 0;
 
         initComponents();
 
+        
         // status bar initialization - message timeout, idle icon and busy animation, etc
         
         ResourceMap resourceMap = getResourceMap();
@@ -169,6 +180,7 @@ counter = 0;
 
         jScrollPane1.setName("jScrollPane1"); // NOI18N
 
+        jList1.setFont(resourceMap.getFont("jList2.font")); // NOI18N
         jList1.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
@@ -186,6 +198,7 @@ counter = 0;
 
         jScrollPane2.setName("jScrollPane2"); // NOI18N
 
+        jList2.setFont(resourceMap.getFont("jList2.font")); // NOI18N
         jList2.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
@@ -203,6 +216,7 @@ counter = 0;
 
         jScrollPane3.setName("jScrollPane3"); // NOI18N
 
+        jList3.setFont(resourceMap.getFont("jList2.font")); // NOI18N
         jList3.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
             public int getSize() { return strings.length; }
@@ -247,28 +261,30 @@ counter = 0;
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jLabel4))
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jTextField1)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 170, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel5)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
-                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2)
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(mainPanelLayout.createSequentialGroup()
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jButton1)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 216, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
+                            .addComponent(jLabel5))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton2))
+                    .addGroup(mainPanelLayout.createSequentialGroup()
                         .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 231, Short.MAX_VALUE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
-                                .addComponent(jButton2)
-                                .addGap(20, 20, 20))
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 231, Short.MAX_VALUE))))
-                .addContainerGap())
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 204, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(mainPanelLayout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addGap(80, 80, 80))
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 329, Short.MAX_VALUE))))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -278,16 +294,12 @@ counter = 0;
                     .addComponent(jLabel1)
                     .addComponent(jLabel2)
                     .addComponent(jLabel3))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addGap(10, 10, 10)
-                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE)))
-                    .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 87, Short.MAX_VALUE)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(jLabel5))
@@ -339,11 +351,11 @@ counter = 0;
                 .addGap(291, 291, 291)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 262, Short.MAX_VALUE))
+                .addComponent(statusPanelSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE))
             .addGroup(statusPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(statusMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 685, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 770, Short.MAX_VALUE)
                 .addComponent(statusAnimationLabel)
                 .addContainerGap())
         );
@@ -364,6 +376,11 @@ counter = 0;
         setComponent(mainPanel);
         setMenuBar(menuBar);
         setStatusBar(statusPanel);
+        addPropertyChangeListener(new java.beans.PropertyChangeListener() {
+            public void propertyChange(java.beans.PropertyChangeEvent evt) {
+                formPropertyChange(evt);
+            }
+        });
     }// </editor-fold>//GEN-END:initComponents
 /*
  * starts the server and thread to run
@@ -383,6 +400,11 @@ counter = 0;
       
 
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void formPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_formPropertyChange
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_formPropertyChange
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
