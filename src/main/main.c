@@ -73,6 +73,8 @@ int main () {
 
   pid_t pid, sid;
   int s = 0;
+  char * home_dir;
+  char ip[BUFFER_SIZE];
 
   /* Daemonize */
   pid = fork();
@@ -84,13 +86,12 @@ int main () {
   sid = setsid();
   if (sid < 0) 
     exit (EXIT_FAILURE);
-  if ((chdir("/")) < 0) 
+  home_dir = getenv ("HOME");
+  if ((chdir(home_dir)) < 0) 
     exit (EXIT_FAILURE);
 
-
-  char ip[BUFFER_SIZE];
   ipFromFile(ip);
-  printf ("1ce moar: %s\n", ip);
+  printf ("Server IP Address: %s\n", ip);
   /* The processing */
   while (1) {
 
@@ -102,7 +103,6 @@ int main () {
       notifyController(0, ip);
     }
     sleep(5);
-
   }
   
   /* Fin */
