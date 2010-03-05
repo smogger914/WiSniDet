@@ -75,6 +75,7 @@ int main () {
   int s = 0;
   char * home_dir;
   char ip[BUFFER_SIZE];
+  struct sockaddr_in sa;
 
   /* Daemonize */
   pid = fork();
@@ -91,6 +92,10 @@ int main () {
     exit (EXIT_FAILURE);
 
   ipFromFile(ip);
+  if (inet_pton(AF_INET, ip, &(sa.sin_addr)) != 1) {
+    fprintf (stderr, "No IP address in config file. Terminating process.\n");
+    exit(5);
+  }
   printf ("Server IP Address: %s\n", ip);
   /* The processing */
   while (1) {

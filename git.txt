@@ -19,3 +19,9 @@ git merge upstream/master
 
 /* Verifying, pulling most up to date */
 git pull upstream master
+
+/* Previous commits */
+git reflog
+
+/* Revert to 1 commit before the head */
+git reset --hard HEAD^
