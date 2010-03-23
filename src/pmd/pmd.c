@@ -1,3 +1,13 @@
+/*!
+ *  \file pmd.c
+ *  \brief Promiscuous Mode Detector
+ *  \ingroup cbackend
+ *  \author Ken Ko
+ *
+ *  Copyright (c) 2010 Really? <BR>
+ *  All Rights Reserved. <BR>
+ */
+
 # include <sys/ioctl.h>
 # include <netinet/in.h>
 # include <stdio.h>
@@ -9,8 +19,8 @@
 # include <stdlib.h>
 # include <string.h>
 
-/*
- *  This array is from iwlib.c
+/**
+ *  This string array copied from iwlib.h used to manage the possible modes
  */
 const char * const iw_operation_mode[] = { "Auto",
                                         "Ad-Hoc",
@@ -21,12 +31,11 @@ const char * const iw_operation_mode[] = { "Auto",
                                         "Monitor",
                                         "Unknown/bug" };
 
-/*
- *  Name:         isPromiscMonitor
- *  Description:  Checks to see if any NIC is in promiscuous
- *                or monitor mode.
- *  Return:       >0    True, there exists at least 1 card in promisc/monitor
- *                0     False
+/*!
+ *  \fn extern int isPromiscuousMonitor()
+ *  \brief Checks to see if a NIC is in promiscuous or monitor mode.
+ *  \ingroup pmd
+ *  \return int : 0 if none detected , 1 if at least one NIC is found.
  */
 
 extern int isPromiscMonitor() {
@@ -40,14 +49,14 @@ extern int isPromiscMonitor() {
   int                     i;
   int                     retVal = 0;
 
-  /* Get a socket handle */
+  /*! Get a socket handle */
   s = socket (AF_INET, SOCK_DGRAM, 0);
   if (s < 0) {
     perror ("socket");
     return 1;
   }
 
-  /* Query available interfaces */
+  /*! Query available interfaces */
   ifc.ifc_len = sizeof(buf);
   ifc.ifc_buf = buf;
   if (ioctl (s, SIOCGIFCONF, &ifc) < 0) {
@@ -68,14 +77,10 @@ extern int isPromiscMonitor() {
       fprintf (stdout, "%s: y u down, charlie brown?\n", ifr.ifr_name);
       continue;
     }
-    // ALLMULTI flag bit set
     if (ifr.ifr_flags & IFF_ALLMULTI) {
-      //fprintf (stdout, "%s:\tALLMULTI\n", ifr.ifr_name);
       retVal = 1;
     }
-    // PROMISC flag bit set 
     if (ifr.ifr_flags & IFF_PROMISC) {
-      //fprintf (stdout, "%s:\tPROMISC\n", ifr.ifr_name);
       retVal = 2;
     }
     
@@ -85,9 +90,7 @@ extern int isPromiscMonitor() {
         info.mode = iwr.u.mode;
       else
         info.mode = IW_NUM_OPER_MODE;
-      //printf ("Mode: %s\n", iw_operation_mode[info.mode]);
-      //printf ("Monitor is %d\n", info.mode);
-      if (info.mode == 6) { /* Monitor mode */
+      if (info.mode == 6) { /*! Monitor mode */
         retVal = 3; 
       } /* IF */
     } /* IF */
@@ -100,12 +103,3 @@ extern int isPromiscMonitor() {
 
 }
 
-/*
-int main () {
-
-  int retVal = 0;
-  retVal = isPromiscMonitor();
-  printf ("Result: %d\n", retVal);
-  return 0;
-}
-*/

@@ -1,5 +1,22 @@
+/*!
+ *  \file main.c
+ *  \brief Begins program execution
+ *  \ingroup cbackend
+ *  \author Ken Ko
+ *
+ *  Copyright (c) 2010 Really? <BR>
+ *  All Rights Reserved. <BR>
+ */
+
 # include "main.h"
 
+/*!
+ *  \fn int ipFromFile (char * ip)
+ *  \ingroup cbackend
+ *  \brief Retrieves IP address from config file.
+ *  \param[out] ip char * : IP address of the server.
+ *  \return int : 0 means successful read.
+ */
 int ipFromFile(char * ip) {
 
   FILE * fd;
@@ -17,6 +34,14 @@ int ipFromFile(char * ip) {
   return 0;
 }
 
+/*!
+ *  \fn int notifyController (int yesno, char * SERVER_IP)
+ *  \ingroup cclient
+ *  \brief Sends UDP packet to controller [ server ] of current status.
+ *  \param yesno int : 1 for promiscuous / monitor found. 0 for none.
+ *  \param SERVER_IP char * : Presentation format of the server's IP address.
+ *  \return int : 0 signifies success.
+ */
 int notifyController(int yesno, char * SERVER_IP) {
 
   int sockfd;
@@ -69,6 +94,13 @@ int notifyController(int yesno, char * SERVER_IP) {
   return 0;
 }
 
+/*!
+ *  \fn int main()
+ *  \ingroup cclient
+ *  \brief Begins the entire c backend and c client side.
+ *  \param void
+ *  \return int : 0 signifies success.
+ */
 int main () {
 
   pid_t pid, sid;
@@ -77,7 +109,7 @@ int main () {
   char ip[BUFFER_SIZE];
   struct sockaddr_in sa;
 
-  /* Daemonize */
+  /*! Daemonize */
   pid = fork();
   if (pid < 0) 
     exit (EXIT_FAILURE);
@@ -91,13 +123,13 @@ int main () {
   if ((chdir(home_dir)) < 0) 
     exit (EXIT_FAILURE);
 
-  ipFromFile(ip);
+  ipFromFile(ip); /// read the IP address from the config file
   if (inet_pton(AF_INET, ip, &(sa.sin_addr)) != 1) {
     fprintf (stderr, "No IP address in config file. Terminating process.\n");
     exit(5);
   }
   printf ("Server IP Address: %s\n", ip);
-  /* The processing */
+  /** The processing */
   while (1) {
 
     s = isPromiscMonitor();
@@ -110,6 +142,6 @@ int main () {
     sleep(5);
   }
   
-  /* Fin */
+  /** Fin */
   exit (EXIT_SUCCESS);
 }

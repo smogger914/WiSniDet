@@ -412,6 +412,7 @@ public class WiSniGUIView extends FrameView implements Runnable {
             System.out.println("making new thread");
         jButton2.setText("Stop Server");
         }
+        
         else {
             
         }
