@@ -1,3 +1,17 @@
+/*!
+ *  \file iwlib.h
+ *  \brief Wireless Extension Library - public header file
+ *  \ingroup wlan
+ *  \author Jean Tourrilhes - HPL - <jt@hpl.hp.com>
+ *
+ *  Copyright (c) 1997-2007 Jean Tourrilhes <BR>
+ *  All Rights Reserved. <BR>
+ */
+/*!
+ *  \defgroup wlan Linux Wireless Utilities
+ *  \brief Wireless API for *nix platform.
+ */
+
 /*
  *	Wireless Tools
  *

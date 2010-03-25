@@ -1,3 +1,13 @@
+/*!
+ *  \file wireless.h
+ *  \brief Standard Wireless Extensions - public header file
+ *  \ingroup wlan
+ *  \author Jean Tourrilhes - HPL - <jt@hpl.hp.com>
+ *
+ *  Copyright (c) 1997-2007 Jean Tourrilhes <BR>
+ *  All Rights Reserved. <BR>
+ */
+
 /*
  * This file define a set of standard wireless extensions
  *

@@ -1,10 +1,10 @@
 /*!
  *  \file main.c
- *  \brief Begins program execution
+ *  \brief Core Functions
  *  \ingroup cbackend
- *  \author Ken Ko
+ *  \author Kenneth Ko
  *
- *  Copyright (c) 2010 Really? <BR>
+ *  Copyright (c) 2010 Kenneth Ko <BR>
  *  All Rights Reserved. <BR>
  */
 
@@ -36,7 +36,7 @@ int ipFromFile(char * ip) {
 
 /*!
  *  \fn int notifyController (int yesno, char * SERVER_IP)
- *  \ingroup cclient
+ *  \ingroup cbackend
  *  \brief Sends UDP packet to controller [ server ] of current status.
  *  \param yesno int : 1 for promiscuous / monitor found. 0 for none.
  *  \param SERVER_IP char * : Presentation format of the server's IP address.
@@ -96,12 +96,11 @@ int notifyController(int yesno, char * SERVER_IP) {
 
 /*!
  *  \fn int main()
- *  \ingroup cclient
+ *  \ingroup cbackend
  *  \brief Begins the entire c backend and c client side.
- *  \param void
  *  \return int : 0 signifies success.
  */
-int main () {
+int main (void) {
 
   pid_t pid, sid;
   int s = 0;

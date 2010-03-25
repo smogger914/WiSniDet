@@ -1,3 +1,19 @@
+/*!
+ *  \file pmd.cpp
+ *  \brief Promiscuous Mode Detector - Windows version
+ *  \ingroup win32backend
+ *  \author Kenneth Ko
+ *
+ *  Copyright (c) 2010 Kenneth Ko <BR>
+ *  All Rights Reserved. <BR>
+ */
+
+/*!
+ *  \defgroup win32backend Backend Functionality - Windows Implementation
+ *  \brief Primary functions for the Windows platform.
+ *  These functions use the Windows API and therefore require he MSVC compiler.
+ */
+
 // pmd.cpp : Defines the entry point for the console application.
 //
 
@@ -18,6 +34,11 @@
 
 #pragma comment(lib,"Wlanapi.lib")
 
+/*!
+ *  \class PMD
+ *  \brief Promiscuous Mode Detector class using Windows API functions.
+ *  \date 2008 March 24
+ */
 class PMD {
 
 	DWORD dClientVersion, dNegotiatedVersion;
@@ -29,20 +50,49 @@ class PMD {
 	INT iReqestedOp, iContinue;
 
 	public:
-		PMD();								// constructor
-		~PMD(){};							// destructor
-		DWORD pmcheckwlan();				// checking function for wlan devices
+                /*!
+                 *  Default constructor.
+                 */
+		PMD();
+                /*!
+                 *  Default destructor.
+                 */
+		~PMD(){};
+                /*!
+                 *  Checking function for WLAN devices in Monitor mode.
+                 */
+		DWORD pmcheckwlan();
 	private:
-		DWORD createConnect();				// create the connection to the device
-		DWORD setInterfaceList();			// populate list of wlan interfaces
-		DWORD getInterfaceCapability();		// retrieve capabilitites --> why?
-		DWORD queryInterface();				// check for monitor or not
+                /*!
+                 *  Create the connection to the device(s).
+                 */
+		DWORD createConnect();
+                /*!
+                 *  Populate list of WLAN interfaces.
+                 */
+		DWORD setInterfaceList();
+                /*!
+                 *  Retrieve capabilities of an interface card.
+                 */
+		DWORD getInterfaceCapability();
+                /*!
+                 *  Check interface for monitor mode flag.
+                 */
+		DWORD queryInterface();
 };
 
 PMD::PMD () {
 	// pro constructor here
 }
 
+/*!
+ *  \fn DWORD PMD::createConnect()
+ *  \ingroup win32backend
+ *  \private
+ *  \brief Creates a connection with the WLAN device(s).
+ *  \retval ERROR_SUCCESS : WlanOpenHandle successful.
+ *  \retval int : Error code from WlanOpenHandle.
+ */
 DWORD PMD::createConnect () {
 	
 	DWORD rtn;
@@ -59,6 +109,14 @@ DWORD PMD::createConnect () {
 	return rtn;
 }
 
+/*!
+ *  \fn DWORD PMD::setInterfaceList()
+ *  \ingroup win32backend
+ *  \private
+ *  \brief Populates an interface list to be used later.
+ *  \retval ERROR_SUCCESS : WlanEnumInterfaces successful.
+ *  \retval int : Error code from WlanEnumInterfaces.
+ */
 DWORD PMD::setInterfaceList () {
 
 	DWORD rtn;
@@ -73,6 +131,14 @@ DWORD PMD::setInterfaceList () {
 	return rtn;
 }
 
+/*!
+ *  \fn DWORD PMD::getInterfaceCapability()
+ *  \ingroup win32backend
+ *  \private
+ *  \brief Retrieves the interface's capabilities.
+ *  \retval ERROR_SUCCESS : WlanGetInterfaceCapability successful.
+ *  \retval int : Error code from WlanGetInterfaceCapability.
+ */
 DWORD PMD::getInterfaceCapability () {
 	
 	PWLAN_INTERFACE_CAPABILITY pCapability = NULL;
@@ -107,6 +173,14 @@ DWORD PMD::getInterfaceCapability () {
 	return rtn;
 }
 
+/*!
+ *  \fn DWORD PMD::queryInterface()
+ *  \ingroup win32backend
+ *  \private
+ *  \brief Queries the interface for monitor mode flag.
+ *  \retval 0 : Extensible Station mode detected.
+ *  \retval 1 : Monitor mode detected.
+ */
 DWORD PMD::queryInterface() {
 
 	DWORD rtn;
@@ -182,15 +256,26 @@ DWORD PMD::queryInterface() {
 
 	if (mode == DOT11_OPERATION_MODE_NETWORK_MONITOR) {
 		printf ("monitor\n");
+                rtn = 1;
 	}
 	else if (mode == DOT11_OPERATION_MODE_EXTENSIBLE_STATION) {
 		printf ("extensible station\n");
+                rtn = 0;
 	}
 	printf ("dot11 %llu\n", DOT11_OPERATION_MODE_NETWORK_MONITOR);
 	printf ("dot11 %llu\n", DOT11_OPERATION_MODE_EXTENSIBLE_STATION);
+        printf ("Returning : %d\n" , rtn);
 	return rtn;
 }
 
+/*!
+ *  \fn DWORD PMD::pmcheckwlan()
+ *  \ingroup win32backend
+ *  \public
+ *  \brief Public function to encapsulate the checking of all WLAN interfaces.
+ *  \retval 1 : At least one monitor mode card found.
+ *  \retval 0 : No monitor mode cards found.
+ */
 DWORD PMD::pmcheckwlan() {
 	
 	DWORD rtn = 0;
@@ -201,13 +286,24 @@ DWORD PMD::pmcheckwlan() {
 	for (pInterfaceList->dwIndex = 0; pInterfaceList->dwIndex < pInterfaceList->dwNumberOfItems; pInterfaceList->dwIndex++)
 	{
 		getInterfaceCapability();
-		queryInterface();
+		rtn = queryInterface();
+                if (rtn == 1) {
+                  return rtn;
+                }
 	}
 	
 	
 	return rtn;
 }
 
+/*!
+ *  \fn int main (int argc, _TCHAR* argv[])
+ *  \ingroup win32backend
+ *  \brief Core functionality for the Windows implementation.
+ *  \param argc int : Number of inputs.
+ *  \param argv _TCHAR *[] : Array of the inputs.
+ *  \retval 0 : Program successfully exited.
+ */
 int main(int argc, _TCHAR* argv[])
 {
 	FreeConsole();

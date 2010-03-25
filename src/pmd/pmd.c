@@ -2,9 +2,9 @@
  *  \file pmd.c
  *  \brief Promiscuous Mode Detector
  *  \ingroup cbackend
- *  \author Ken Ko
+ *  \author Kenneth Ko
  *
- *  Copyright (c) 2010 Really? <BR>
+ *  Copyright (c) 2010 Kenneth Ko <BR>
  *  All Rights Reserved. <BR>
  */
 
@@ -32,9 +32,9 @@ const char * const iw_operation_mode[] = { "Auto",
                                         "Unknown/bug" };
 
 /*!
- *  \fn extern int isPromiscuousMonitor()
+ *  \fn extern int isPromiscMonitor()
  *  \brief Checks to see if a NIC is in promiscuous or monitor mode.
- *  \ingroup pmd
+ *  \ingroup cbackend
  *  \return int : 0 if none detected , 1 if at least one NIC is found.
  */
 

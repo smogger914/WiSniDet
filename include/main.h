@@ -1,3 +1,19 @@
+/*!
+ *  \file main.h
+ *  \brief Core Functions - public header file
+ *  \ingroup cbackend
+ *  \author Kenneth Ko
+ *
+ *  Copyright (c) 2010 Kenneth Ko <BR>
+ *  All Rights Reserved. <BR>
+ */
+
+/*!
+ *  \defgroup cbackend Backend Functionality
+ *  \brief  Daemon process.
+ *  Daemon functions for the promiscuous mode detector.
+ */
+
 #ifndef MAIN
 #define MAIN
 
@@ -17,7 +33,6 @@
 
 # define CONFIG_FILE  "pmd.conf"
 
-//# define SERVER_IP    "129.210.238.102"
 # define SERVER_PORT  "5316" 
 # define BUFFER_SIZE  100
 

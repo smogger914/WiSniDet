@@ -1,6 +1,14 @@
-// stdafx.cpp : source file that includes just the standard includes
-// pmd.pch will be the pre-compiled header
-// stdafx.obj will contain the pre-compiled type information
+/*!
+ *  \file stdafx.cpp
+ *  \brief Source file for standard includes
+ *
+ *  Source file that includes just the standard includes.
+ *  \ingroup win32backend
+ *  \author Visual Basic 2010
+ */
+
+/// pmd.pch will be the pre-compiled header
+/// stdafx.obj will contain the pre-compiled type information
 
 #include "stdafx.h"
 
