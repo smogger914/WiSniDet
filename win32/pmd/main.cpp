@@ -21,6 +21,17 @@
  */
 int ipFromFile (char * ip) {
 
+	FILE * fd;
+	fd = fopen (CONFIG_FILE_WIN32, "r");
+
+	if (fgets (ip, BUFFER_SIZE, fd) == NULL) {
+		fprintf (stderr, "Config file empty\n");
+		exit(1);
+	}
+	if (ip[strlen(ip)-1] == '\n')
+		ip[strlen(ip)-1] = '\0';
+
+	fclose (fd);
 	return 0;
 }
 
@@ -34,23 +45,63 @@ int ipFromFile (char * ip) {
  */
 int notifyController(int yesno, char * SERVER_IP) {
 
-	struct sockaddr_in serverAddr; 		/// server address
-	struct sockaddr_in clientAddr; 		/// client address
-	int sockfd;							/// socket file descriptor 
-	char buf[BUFFER_SIZE];				/// message buffer
-	int proPort;						/// protocol port
-	int len = sizeof (struct sockaddr);	/// size of sockaddr
+	int sockfd;								/// socket file descriptor 
+	char buf[BUFFER_SIZE];					/// message buffer
+	WSADATA wsaData;						/// used for WSAStartup
+	struct addrinfo hints, *p, *servinfo;	/// addrinfo stuff
+	int rv, numbytes;						/// used for return codes
 
-	WSADATA wsaData;
-	WSAStartup (0x0202, &wsaData);		/// windows socket startup
-	
-	memset ((char *) &clientAddr, 0, sizeof (clientAddr));
-	clientAddr.sin_family = AF_INET;	/// address family for client
-	clientAddr.sin_addr.s_addr = INADDR_ANY;
-	clientAddr.sin_port = htons ((u_short) SERVER_PORT); /// server port set
+	/*!
+	 *	Create the message packet to send
+	 */
+	if (yesno == 1) {
+		strncpy (buf, "1234567890", sizeof (buf));
+	}
+	else {
+		strncpy (buf, "123", sizeof(buf));
+	}
 
-	serverAddr.sin_family = AF_INET;
+	/*!
+	 *	Open the windows connection
+	 *	\param 0x0101 : Version of WinSock to use.
+	 *	\param w : Structure of WSADATA to send.
+	 */
+	if (WSAStartup (0x0101 , &wsaData) != 0) {	
+		fprintf (stderr, "Error opening the Windows connection.\n");
+		exit(1);
+	}
 
+	ZeroMemory (&hints, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_DGRAM;
+
+	if ( (rv = getaddrinfo (SERVER_IP, SERVER_PORT, &hints, &servinfo)) != 0) {
+		perror ("notifyController [getaddrinfo]");
+		WSACleanup();
+		return 1;
+	}
+
+	for (p = servinfo; p != NULL; p = p->ai_next) {
+		if ((sockfd = socket (p->ai_family, p->ai_socktype,
+			p->ai_protocol)) == -1) {
+			perror ("notifyController [socket]");
+			WSACleanup();
+			continue;
+		}
+		break;
+	}
+
+	if (p == NULL) {
+		fprintf (stderr, "Client: Failed to bind socket\n");
+		return 2;
+	}
+
+	if ((numbytes = sendto (sockfd, buf, strlen(buf), 0, p->ai_addr,
+							p->ai_addrlen)) == -1) {
+		perror ("talker: sendto");
+		WSACleanup();
+		exit(1);
+	}
 
 	return 0;
 }
@@ -68,6 +119,7 @@ int notifyController(int yesno, char * SERVER_IP) {
 int main(int argc, _TCHAR* argv[])
 {
 	FreeConsole();
+	struct sockaddr_in sa;
 	char ip[BUFFER_SIZE];
 	FILE * fp;
 	if ( (fp = freopen ("D:\\ko\\Desktop\\tests.txt", "w+", stdout) ) == NULL )
@@ -75,6 +127,13 @@ int main(int argc, _TCHAR* argv[])
 
 	DWORD rtn = 0;
 	PMD pminstance;
+
+	ipFromFile(ip);
+	if (inet_pton (AF_INET, ip, &(sa.sin_addr)) != 1) {
+		fprintf (stderr, "No IP address found in config file. Terminating.\n");
+		exit(5);
+	}
+	printf ("Server IP address: %s\n", ip);
 
 	while (1) {
 		rtn = pminstance.pmcheckwlan();
@@ -85,7 +144,6 @@ int main(int argc, _TCHAR* argv[])
 			notifyController (0, ip);
 		}
 		Sleep(5);
-		break;
 	}
 	
 	printf ("baller\n");

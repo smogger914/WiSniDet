@@ -17,69 +17,8 @@
 // pmd.cpp : Defines the entry point for the console application.
 //
 
-#include "stdafx.h"
-
-#include <windows.h>
-#include <conio.h>
-#include <objbase.h>
-#include <rpcsal.h>
-#include <objbase.h>
-#include <msxml6.h>
-#include <atlbase.h>
-#include <iostream>
-#include <iomanip>
-#include <windows.h>
-// headers needed to use WLAN APIs 
-#include <wlanapi.h>
-
-#pragma comment(lib,"Wlanapi.lib")
-
-/*!
- *  \class PMD
- *  \brief Promiscuous Mode Detector class using Windows API functions.
- *  \date 2008 March 24
- */
-class PMD {
-
-	DWORD dClientVersion, dNegotiatedVersion;
-	HANDLE hClientHandle;
-	PWLAN_INTERFACE_INFO_LIST pInterfaceList;
-	DWORD dSelectedInterfaceIndex;
-	PWLAN_CONNECTION_ATTRIBUTES pCurrentConnInfo;
-	DWORD	dwSize;
-	INT iReqestedOp, iContinue;
-
-	public:
-                /*!
-                 *  Default constructor.
-                 */
-		PMD();
-                /*!
-                 *  Default destructor.
-                 */
-		~PMD(){};
-                /*!
-                 *  Checking function for WLAN devices in Monitor mode.
-                 */
-		DWORD pmcheckwlan();
-	private:
-                /*!
-                 *  Create the connection to the device(s).
-                 */
-		DWORD createConnect();
-                /*!
-                 *  Populate list of WLAN interfaces.
-                 */
-		DWORD setInterfaceList();
-                /*!
-                 *  Retrieve capabilities of an interface card.
-                 */
-		DWORD getInterfaceCapability();
-                /*!
-                 *  Check interface for monitor mode flag.
-                 */
-		DWORD queryInterface();
-};
+# include "stdafx.h"
+# include "pmd.h"
 
 PMD::PMD () {
 	// pro constructor here
@@ -184,9 +123,6 @@ DWORD PMD::getInterfaceCapability () {
 DWORD PMD::queryInterface() {
 
 	DWORD rtn;
-	TCHAR szCurrentESSID[256];
-	TCHAR szCurrentMACAddressStr[256]; 
-	INT iCurrentRSSI;
 	ULONG ulSize = 0;
 
 	dClientVersion = 1;
@@ -291,34 +227,15 @@ DWORD PMD::pmcheckwlan() {
                   return rtn;
                 }
 	}
+
+	if (hClientHandle != NULL) {
+        WlanCloseHandle(
+			hClientHandle, 
+			NULL            // reserved
+		);
+    }
 	
 	
 	return rtn;
 }
 
-/*!
- *  \fn int main (int argc, _TCHAR* argv[])
- *  \ingroup win32backend
- *  \brief Core functionality for the Windows implementation.
- *  \param argc int : Number of inputs.
- *  \param argv _TCHAR *[] : Array of the inputs.
- *  \retval 0 : Program successfully exited.
- */
-int main(int argc, _TCHAR* argv[])
-{
-	FreeConsole();
-
-	FILE * fp;
-	if ( (fp = freopen ("D:\\ko\\Desktop\\tests.txt", "w+", stdout) ) == NULL )
-		exit (-1);
-
-	DWORD rtn = 0;
-
-	PMD pminstance;
-	pminstance.pmcheckwlan();
-	Sleep(5000);
-	
-	printf ("baller\n");
-
-	return rtn;
-}

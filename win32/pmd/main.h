@@ -2,15 +2,20 @@
 # ifndef __MAIN_DEFINED__
 # define __MAIN_DEFINED__
 
-# include "pmd.h"
-# include <winsock2.h>
+# include <winsock2.h>			/// include winsock2.h BEFORE windows.h
+# include <WS2tcpip.h>
+# include <WSPiApi.h>
 # include <stdio.h>
+
+# include "pmd.h"				/// contains windows.h #include
+
 
 # pragma comment (lib, "ws2_32.lib")
 
-# define BUFFER_SIZE 100
-# define SERVER_PORT "5316"
-# define CONFIG_FILE "pmd.conf"
+# define BUFFER_SIZE 		100
+# define SERVER_PORT 		"5316"
+# define CONFIG_FILE 		"pmd.conf"
+# define CONFIG_FILE_WIN32 	"C:\\Users\\ko\\AppData\\Local\\Temp\\pmd.conf"
 
 
 # endif
