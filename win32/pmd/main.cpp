@@ -12,6 +12,9 @@
 # include "stdafx.h"
 # include "main.h"
 
+
+
+
 /*!
  *  \fn int ipFromFile (char * ip)
  *  \ingroup cbackend
@@ -22,11 +25,24 @@
 int ipFromFile (char * ip) {
 
 	FILE * fd;
-	fd = fopen (CONFIG_FILE_WIN32, "r");
 
+	/// write the file for testing
+	fopen_s (&fd, CONFIG_FILE_WIN32, "w");
+	if (fd == NULL) {
+		printf ("Error writing config file\n");
+		exit(6);
+	}
+	fprintf (fd, "127.0.0.1");
+	fclose(fd);
+
+	fopen_s (&fd, CONFIG_FILE_WIN32, "r");
+	if (fd == NULL) {
+		printf ("Error reading config file, exiting.\n");
+		exit(6);
+	}
 	if (fgets (ip, BUFFER_SIZE, fd) == NULL) {
 		fprintf (stderr, "Config file empty\n");
-		exit(1);
+		exit(8);
 	}
 	if (ip[strlen(ip)-1] == '\n')
 		ip[strlen(ip)-1] = '\0';
@@ -55,11 +71,12 @@ int notifyController(int yesno, char * SERVER_IP) {
 	 *	Create the message packet to send
 	 */
 	if (yesno == 1) {
-		strncpy (buf, "1234567890", sizeof (buf));
+		strncpy_s (buf, BUFFER_SIZE, SENDAYES, strlen (SENDAYES));
 	}
 	else {
-		strncpy (buf, "123", sizeof(buf));
+		strncpy_s (buf, BUFFER_SIZE, SENDANO, strlen(SENDANO));
 	}
+	printf ("Message to be sent: %s\n", buf);
 
 	/*!
 	 *	Open the windows connection
@@ -68,7 +85,7 @@ int notifyController(int yesno, char * SERVER_IP) {
 	 */
 	if (WSAStartup (0x0101 , &wsaData) != 0) {	
 		fprintf (stderr, "Error opening the Windows connection.\n");
-		exit(1);
+		exit(9);
 	}
 
 	ZeroMemory (&hints, sizeof(hints));
@@ -78,6 +95,8 @@ int notifyController(int yesno, char * SERVER_IP) {
 	if ( (rv = getaddrinfo (SERVER_IP, SERVER_PORT, &hints, &servinfo)) != 0) {
 		perror ("notifyController [getaddrinfo]");
 		WSACleanup();
+		//freeaddrinfo(servinfo);
+//		closesocket(sockfd);
 		return 1;
 	}
 
@@ -85,7 +104,6 @@ int notifyController(int yesno, char * SERVER_IP) {
 		if ((sockfd = socket (p->ai_family, p->ai_socktype,
 			p->ai_protocol)) == -1) {
 			perror ("notifyController [socket]");
-			WSACleanup();
 			continue;
 		}
 		break;
@@ -93,6 +111,9 @@ int notifyController(int yesno, char * SERVER_IP) {
 
 	if (p == NULL) {
 		fprintf (stderr, "Client: Failed to bind socket\n");
+		WSACleanup();
+		freeaddrinfo(servinfo);
+		closesocket(sockfd);
 		return 2;
 	}
 
@@ -100,8 +121,11 @@ int notifyController(int yesno, char * SERVER_IP) {
 							p->ai_addrlen)) == -1) {
 		perror ("talker: sendto");
 		WSACleanup();
-		exit(1);
+		exit(7);
 	}
+	WSACleanup();
+	freeaddrinfo(servinfo);
+	closesocket(sockfd);
 
 	return 0;
 }
@@ -118,13 +142,17 @@ int notifyController(int yesno, char * SERVER_IP) {
  */
 int main(int argc, _TCHAR* argv[])
 {
-	FreeConsole();
+
+	//FreeConsole();
 	struct sockaddr_in sa;
 	char ip[BUFFER_SIZE];
+/*
 	FILE * fp;
+
 	if ( (fp = freopen ("D:\\ko\\Desktop\\tests.txt", "w+", stdout) ) == NULL )
 		exit (-1);
-
+	fclose(fp);
+*/
 	DWORD rtn = 0;
 	PMD pminstance;
 
@@ -135,18 +163,20 @@ int main(int argc, _TCHAR* argv[])
 	}
 	printf ("Server IP address: %s\n", ip);
 
+
 	while (1) {
+
 		rtn = pminstance.pmcheckwlan();
+	
 		if (rtn) {
 			notifyController (1, ip);
 		}
 		else {
 			notifyController (0, ip);
 		}
-		Sleep(5);
-	}
 	
-	printf ("baller\n");
+		Sleep(5000);	/// This is in milliseconds.
+	}
 
 	return rtn;
 }

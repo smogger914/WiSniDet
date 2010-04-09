@@ -22,6 +22,11 @@
 
 PMD::PMD () {
 	// pro constructor here
+	pCurrentConnInfo = NULL;
+	pInterfaceList = NULL;
+	hClientHandle = NULL;
+	dClientVersion = 1;
+	dNegotiatedVersion = 0;
 }
 
 /*!
@@ -35,16 +40,16 @@ PMD::PMD () {
 DWORD PMD::createConnect () {
 	
 	DWORD rtn;
-	dClientVersion = 1;
 	dNegotiatedVersion = 0;
+	dClientVersion = 1;
 
 	// create file handler
 	rtn = WlanOpenHandle (dClientVersion, NULL, &dNegotiatedVersion, &hClientHandle);
 	if (rtn != ERROR_SUCCESS) {
 		printf ("WlanOpenHandle\n");
-		scanf_s ("%d", &iContinue);
-		return rtn;
+		//scanf_s ("%d", &iContinue);
 	}
+	
 	return rtn;
 }
 
@@ -64,8 +69,7 @@ DWORD PMD::setInterfaceList () {
 	rtn = WlanEnumInterfaces (hClientHandle, NULL, &pInterfaceList);
 	if (rtn != ERROR_SUCCESS) {
 		printf ("WlanEnumInterfaces: %d\n", rtn);
-		scanf_s ("%d", &iContinue);
-		return rtn;
+		//scanf_s ("%d", &iContinue);
 	}
 	return rtn;
 }
@@ -93,6 +97,7 @@ DWORD PMD::getInterfaceCapability () {
 					&pCapability);
 		
 		if ( rtn != ERROR_SUCCESS ) {
+			
 			__leave;
 		}
 		interfaceType = pCapability->interfaceType;
@@ -100,15 +105,25 @@ DWORD PMD::getInterfaceCapability () {
 	}
 	__finally
     {
-        // clean up
-        if (hClientHandle != NULL)
-        {
-            WlanCloseHandle(
-                hClientHandle, 
-                NULL            // reserved
-                );
-        }
     }
+
+	/*
+	 *	Cleanup process for local handles
+	 */
+	/*
+	if (pCapability != NULL)
+	{
+		printf ("\pCapability not null\n");
+		WlanFreeMemory(pCapability);
+	}
+	
+	if (interfaceType != NULL)
+	{
+		printf ("\interfaceType not null\n");
+		WlanFreeMemory((VOID*)&interfaceType);			/// segfault?
+	}
+	*/
+
 	return rtn;
 }
 
@@ -122,21 +137,23 @@ DWORD PMD::getInterfaceCapability () {
  */
 DWORD PMD::queryInterface() {
 
-	DWORD rtn;
+	DWORD rtn = 0;
 	ULONG ulSize = 0;
-
-	dClientVersion = 1;
 	dNegotiatedVersion = 0;
+	dClientVersion = 1;
+
+	/*
 	rtn = WlanOpenHandle(dClientVersion, NULL, &dNegotiatedVersion, &hClientHandle);
 	if(rtn != ERROR_SUCCESS) {
 
 		printf("Error occured in WlanOpenHandle: %d\n", rtn);
 		return rtn;
 	}
+	*/
 
 	// get connected AP info from WLAN API
 	dwSize = 0;
-	pCurrentConnInfo = NULL;
+	//pCurrentConnInfo = NULL;
 	rtn = WlanQueryInterface(hClientHandle,
 					&pInterfaceList->InterfaceInfo[pInterfaceList->dwIndex].InterfaceGuid,
 					wlan_intf_opcode_current_connection,
@@ -162,45 +179,31 @@ DWORD PMD::queryInterface() {
 		// that means not connected to any AP
 		rtn = ERROR_SUCCESS;
 
-		if(pCurrentConnInfo != NULL)
-		{
-			WlanFreeMemory((PVOID) pCurrentConnInfo);
-		}
-
-		// close handle
-		WlanCloseHandle(hClientHandle, NULL);
-
 		printf("Not connected to any AP\n");
-
 		return rtn;
 	} 
 	else if(rtn != ERROR_SUCCESS)
 	{
-		if(pCurrentConnInfo != NULL)
-		{
-			WlanFreeMemory((PVOID) pCurrentConnInfo);
-		}
-
-		// close handle
-		WlanCloseHandle(hClientHandle, NULL);
-
 		printf("Error occured in WlanQueryInterface: %d\n", rtn);
-
 		return rtn;
 	}
 
 
 	if (mode == DOT11_OPERATION_MODE_NETWORK_MONITOR) {
-		printf ("monitor\n");
-                rtn = 1;
+		//printf ("monitor\n");
+        rtn = 1;
 	}
 	else if (mode == DOT11_OPERATION_MODE_EXTENSIBLE_STATION) {
-		printf ("extensible station\n");
-                rtn = 0;
+		//printf ("extensible station\n");
+        rtn = 0;
 	}
+	/*
 	printf ("dot11 %llu\n", DOT11_OPERATION_MODE_NETWORK_MONITOR);
 	printf ("dot11 %llu\n", DOT11_OPERATION_MODE_EXTENSIBLE_STATION);
-        printf ("Returning : %d\n" , rtn);
+    printf ("Returning : %d\n" , rtn);
+	*/
+
+
 	return rtn;
 }
 
@@ -211,31 +214,59 @@ DWORD PMD::queryInterface() {
  *  \brief Public function to encapsulate the checking of all WLAN interfaces.
  *  \retval 1 : At least one monitor mode card found.
  *  \retval 0 : No monitor mode cards found.
+ *	\retval -1 : The process is broken.
  */
 DWORD PMD::pmcheckwlan() {
 	
-	DWORD rtn = 0;
+	DWORD rtn = -1;
 
 	createConnect();
 	setInterfaceList();
 
+	
 	for (pInterfaceList->dwIndex = 0; pInterfaceList->dwIndex < pInterfaceList->dwNumberOfItems; pInterfaceList->dwIndex++)
 	{
 		getInterfaceCapability();
+		
 		rtn = queryInterface();
-                if (rtn == 1) {
-                  return rtn;
-                }
+		
+		if (rtn == 1) {
+			cleanup();
+          	return rtn;
+        }
+		
 	}
+	
+	cleanup();
+	return rtn;
+}
+
+/*!
+ *  \fn DWORD PMD::cleanup()
+ *  \ingroup win32backend
+ *  \private
+ *  \brief Cleans up the allocated memory before exiting a function.
+ *  \retval 0 : Successful exit.
+ */
+VOID PMD::cleanup() {
 
 	if (hClientHandle != NULL) {
+		printf ("\thClientHandle not null\n");
         WlanCloseHandle(
 			hClientHandle, 
 			NULL            // reserved
 		);
     }
+	if (pInterfaceList != NULL) {
+		printf ("\tpInterfaceList not null \n");
+		WlanFreeMemory(pInterfaceList);
+	}
 	
-	
-	return rtn;
+	if (pCurrentConnInfo != NULL)
+	{
+		printf ("\tpCurrentConnInfo not null\n");
+		WlanFreeMemory(pCurrentConnInfo);
+	}/*
+	*/
 }
 

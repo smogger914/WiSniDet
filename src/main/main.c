@@ -138,7 +138,7 @@ int main (void) {
     else {
       notifyController(0, ip);
     }
-    sleep(5);
+    sleep(5);	/// This is in seconds.
   }
   
   /** Fin */

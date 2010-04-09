@@ -35,8 +35,8 @@ class PMD {
 
 	DWORD dClientVersion, dNegotiatedVersion;
 	HANDLE hClientHandle;
-	PWLAN_INTERFACE_INFO_LIST pInterfaceList;
 	DWORD dSelectedInterfaceIndex;
+	PWLAN_INTERFACE_INFO_LIST pInterfaceList;
 	PWLAN_CONNECTION_ATTRIBUTES pCurrentConnInfo;
 	DWORD	dwSize;
 	INT iReqestedOp, iContinue;
@@ -71,6 +71,10 @@ class PMD {
                  *  Check interface for monitor mode flag.
                  */
 		DWORD queryInterface();
+		/*!
+		 *	Clean up the file descriptors and such.
+		 */
+		VOID cleanup();
 };
 
 #endif

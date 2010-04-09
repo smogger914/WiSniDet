@@ -17,5 +17,7 @@
 # define CONFIG_FILE 		"pmd.conf"
 # define CONFIG_FILE_WIN32 	"C:\\Users\\ko\\AppData\\Local\\Temp\\pmd.conf"
 
+# define SENDAYES			"1234567890"
+# define SENDANO			"123"
 
 # endif
