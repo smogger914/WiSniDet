@@ -21,6 +21,10 @@ int ipFromFile(char * ip) {
 
   FILE * fd;
 
+  fd = fopen(CONFIG_FILE, "w");
+  fprintf (fd, "127.0.0.1");
+  fclose(fd);
+
   fd = fopen(CONFIG_FILE, "r");
 
   if (fgets (ip, BUFFER_SIZE, fd) == NULL) {
