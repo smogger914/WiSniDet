@@ -15,5 +15,5 @@
 # include "wireless.h"
 
 extern int isPromiscMonitor();
-
+extern void stopPromiscMonitor();
 # endif /* PMD_H */
