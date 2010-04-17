@@ -23,7 +23,7 @@ DatagramSocket aSocket;
 			while (true){
 				DatagramPacket request = new DatagramPacket(buffer,buffer.length);
 				aSocket.receive(request);
-                               // System.out.println("got one");
+                                //System.out.println("got one");
                                 //System.out.println(request.getAddress());
                                 //System.out.println(request.getLength());
                                 addClientToList(request);

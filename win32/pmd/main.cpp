@@ -146,15 +146,11 @@ int main(int argc, _TCHAR* argv[])
 	//FreeConsole();
 	struct sockaddr_in sa;
 	char ip[BUFFER_SIZE];
-/*
-	FILE * fp;
 
-	if ( (fp = freopen ("D:\\ko\\Desktop\\tests.txt", "w+", stdout) ) == NULL )
-		exit (-1);
-	fclose(fp);
-*/
 	DWORD rtn = 0;
 	PMD pminstance;
+
+	
 
 	ipFromFile(ip);
 	if (inet_pton (AF_INET, ip, &(sa.sin_addr)) != 1) {
