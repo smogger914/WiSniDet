@@ -42,34 +42,38 @@ class PMD {
 	INT iReqestedOp, iContinue;
 
 	public:
-                /*!
-                 *  Default constructor.
-                 */
+        /*!
+            *  Default constructor.
+            */
 		PMD();
-                /*!
-                 *  Default destructor.
-                 */
+        /*!
+            *  Default destructor.
+            */
 		~PMD(){};
-                /*!
-                 *  Checking function for WLAN devices in Monitor mode.
-                 */
+        /*!
+            *  Checking function for WLAN devices in Monitor mode.
+            */
 		DWORD pmcheckwlan();
+		/*!
+		 *	Sets the flag to return the interface into EXTENSIBLE_STATION mode.
+		 */
+		DWORD stopMonitorMode();
 	private:
-                /*!
-                 *  Create the connection to the device(s).
-                 */
+        /*!
+            *  Create the connection to the device(s).
+            */
 		DWORD createConnect();
-                /*!
-                 *  Populate list of WLAN interfaces.
-                 */
+        /*!
+            *  Populate list of WLAN interfaces.
+            */
 		DWORD setInterfaceList();
-                /*!
-                 *  Retrieve capabilities of an interface card.
-                 */
+        /*!
+            *  Retrieve capabilities of an interface card.
+            */
 		DWORD getInterfaceCapability();
-                /*!
-                 *  Check interface for monitor mode flag.
-                 */
+        /*!
+            *  Check interface for monitor mode flag.
+            */
 		DWORD queryInterface();
 		/*!
 		 *	Clean up the file descriptors and such.

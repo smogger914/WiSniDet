@@ -192,6 +192,7 @@ DWORD PMD::queryInterface() {
 	if (mode == DOT11_OPERATION_MODE_NETWORK_MONITOR) {
 		//printf ("monitor\n");
         rtn = 1;
+		printf ("Found dwIndex, %d\n", pInterfaceList->dwIndex);
 	}
 	else if (mode == DOT11_OPERATION_MODE_EXTENSIBLE_STATION) {
 		//printf ("extensible station\n");
@@ -215,6 +216,8 @@ DWORD PMD::queryInterface() {
  *  \retval 1 : At least one monitor mode card found.
  *  \retval 0 : No monitor mode cards found.
  *	\retval -1 : The process is broken.
+ *	\retval -2 : Monitor mode found but could not be stopped.
+ *	\retval -3 : Monitor mode found and stopped.
  */
 DWORD PMD::pmcheckwlan() {
 	
@@ -231,6 +234,14 @@ DWORD PMD::pmcheckwlan() {
 		rtn = queryInterface();
 		
 		if (rtn == 1) {
+			if (stopMonitorMode() == ERROR_SUCCESS) {
+				printf ("Monitor mode stopped~\n");
+				rtn = -3;
+			}
+			else  {
+				printf ("Monitor mode failed to stop!\n");
+				rtn = -2;
+			}
 			cleanup();
           	return rtn;
         }
@@ -242,11 +253,82 @@ DWORD PMD::pmcheckwlan() {
 }
 
 /*!
+ *  \fn DWORD PMD::stopMonitorMode()
+ *  \ingroup win32backend
+ *  \private
+ *  \brief Changes monitor mode flag on the interface back to managed mode.
+ *  \retval 0 : Successful exit.
+ *	\retval 1 : Someerror.
+ */
+
+DWORD PMD::stopMonitorMode() {
+
+	DWORD rtn = 0;
+	ULONG ulSize = 0;
+	dNegotiatedVersion = 0;
+	dClientVersion = 1;
+
+	// get connected AP info from WLAN API
+	dwSize = 0;
+
+	
+	ULONG pulresult = DOT11_OPERATION_MODE_EXTENSIBLE_STATION;
+	PULONG mode = &pulresult;
+
+	printf ("I want to change dwIndex, %d\n", pInterfaceList->dwIndex);
+	rtn = WlanSetInterface(hClientHandle,
+					&pInterfaceList->InterfaceInfo[pInterfaceList->dwIndex].InterfaceGuid,
+					wlan_intf_opcode_current_operation_mode,
+					sizeof(mode),
+					mode,
+					NULL);
+
+	if(rtn == ERROR_INVALID_STATE) {
+
+		// that means not connected to any AP
+		rtn = ERROR_SUCCESS;
+
+		printf("Not connected to any AP\n");
+		return rtn;
+	} 
+	else if(rtn != ERROR_SUCCESS)
+	{
+		switch (rtn) {
+		case ERROR_ACCESS_DENIED:
+			printf ("WlanSetInterface [ERROR_ACCESS_DENIED]\n");
+			break;
+		case ERROR_GEN_FAILURE:
+			printf ("WlanSetInterface [ERROR_GEN_FAILURE]\n");
+			break;
+		case ERROR_INVALID_HANDLE:
+			printf ("WlanSetInterface [ERROR_INVALID_HANDLE]\n");
+			break;
+		case ERROR_INVALID_PARAMETER:
+			printf ("WlanSetInterface [ERROR_INVALID_PARAMETER]\n");
+			break;
+		/*
+		case RPC_STATUS:
+			printf ("WlanSetInterface [RPC_STATUS]\n");
+			break;
+		*/
+		default:
+			printf ("WlanSetInterface [SHOULD_NOT]\n");
+			break;
+		}
+
+		printf("Error occured in WlanSetInterface: %d\n", rtn);
+		return rtn;
+	}
+	
+
+	return rtn;
+}
+
+/*!
  *  \fn DWORD PMD::cleanup()
  *  \ingroup win32backend
  *  \private
  *  \brief Cleans up the allocated memory before exiting a function.
- *  \retval 0 : Successful exit.
  */
 VOID PMD::cleanup() {
 

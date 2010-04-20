@@ -31,8 +31,6 @@ const char * const iw_operation_mode[] = { "Auto",
                                         "Monitor",
                                         "Unknown/bug" };
 
-
-
 /*!
  *  \fn extern int isPromiscMonitor()
  *  \brief Checks to see if a NIC is in promiscuous or monitor mode.
@@ -43,10 +41,10 @@ const char * const iw_operation_mode[] = { "Auto",
 extern int isPromiscMonitor() {
 
   char                    buf[1024];
-  struct ifconf           ifc;//if configuration
-  struct ifreq            ifr;//requesting info from the interface card get ifconf
-  struct iwreq            iwr;//requesting info from the wireless card get iwconf
-  struct wireless_config  info;//iw configuration
+  struct ifconf           ifc;
+  struct ifreq            ifr;
+  struct iwreq            iwr;
+  struct wireless_config  info;
   int                     s;
   int                     i;
   int                     retVal = 0;
@@ -55,7 +53,7 @@ extern int isPromiscMonitor() {
   s = socket (AF_INET, SOCK_DGRAM, 0);
   if (s < 0) {
     perror ("socket");
-    return -1;
+    return 1;
   }
 
   /*! Query available interfaces */
@@ -63,59 +61,69 @@ extern int isPromiscMonitor() {
   ifc.ifc_buf = buf;
   if (ioctl (s, SIOCGIFCONF, &ifc) < 0) {
     perror ("ioctl(SIOCIFCONF)");
-    return -2;
+    return 1;
   }
-  /*! Goes through all interfaces and check if in promiscous or monitor or multicast*/
+
   for (i = 0; i < 255; i++) {
     memset (&ifr, 0, sizeof(ifr));
     ifr.ifr_ifindex = i;
-
-    if (ioctl (s, SIOCGIFNAME, &ifr) == -1){
-      fprintf (stderr, "ioctl(SIOCGIFNAME) , %s\n", ifr.ifr_name);
-		continue;
-	 }
+    if (ioctl (s, SIOCGIFNAME, &ifr) == -1)
+      continue;
     if (ioctl (s, SIOCGIFFLAGS, &ifr) == -1) {
       fprintf (stderr, "ioctl(SIOCGIFFLAGS) , %s\n", ifr.ifr_name);
       continue;
     }
     if (! (ifr.ifr_flags & IFF_UP)) {
-      fprintf (stdout, "%s: y u down, charlie brown?\n", ifr.ifr_name);
+      fprintf (stdout, "%s: interface down\n", ifr.ifr_name);
       continue;
     }
     if (ifr.ifr_flags & IFF_ALLMULTI) {
       retVal = 1;
-		//shut down interface
-
-//		ioctl (s, SIOCGIFFLAGS, &ifr)
+    //    printf("MULTI: got one: %s, flags are: %x\n", ifr.ifr_name, ifr.ifr_flags);
+        //stop allmulti       
+        ifr.ifr_flags &= ~IFF_ALLMULTI;//remove allmulticast flag
+        ifr.ifr_flags |= IFF_MULTICAST;//set to normal operation mode multicast
+        ioctl (s, SIOCSIFFLAGS, &ifr);
+    //    printf("MULTI: got two: %s, flags are: %x\n", ifr.ifr_name, ifr.ifr_flags);
     }
+    // printf("FLAGS are %d\n",ifr.ifr_flags);
     if (ifr.ifr_flags & IFF_PROMISC) {
       retVal = 2;
-	   //shut down interface
-
+        //printf("found promisc!")
+        //printf("PROMISC got one: %s, flags are: %d\n", ifr.ifr_name, ifr.ifr_flags);
+        //stop promisc
+        ifr.ifr_flags &= ~IFF_PROMISC;//remove promiscflag
+        ifr.ifr_flags |= IFF_MULTICAST;//set to normal multicast mode
+        ioctl (s, SIOCSIFFLAGS, &ifr);
+        //printf("PROMISC got two: %s, flags are: %d\n", ifr.ifr_name, ifr.ifr_flags);
     }
-    
+   
     if (iw_get_ext (s, ifr.ifr_name, SIOCGIWMODE, &iwr) >= 0) {
       info.has_mode = 1;
       if (iwr.u.mode < IW_NUM_OPER_MODE)
         info.mode = iwr.u.mode;
-	   
-      else 
+      else
         info.mode = IW_NUM_OPER_MODE;
-		
-      if (info.mode == 6){  /*! Monitor mode */
-        retVal = 3; 
-		  //shut down interface
-		  iwr.u.mode = 3;
-		//  iw_set_ext (s, ifr.ifr_name, SIOCSIWMODE, &iwr);
-		  
+      if (info.mode == 6) { /*! Monitor mode */
+        retVal = 3;
+
+          //stop monitor mode
+          iwr.u.mode = 2;
+       
+          int k;
+
+          if((k=iw_set_ext(s,ifr.ifr_name,SIOCSIWMODE,&iwr)) < 0){
+             printf("k = %d+ errorno %s + epic fail\n", k, strerror(errno));
+          }
+          printf("got one: %s\n", ifr.ifr_name);
+
       } /* IF */
     } /* IF */
   } /* FOR */
-    
+   
   if (s) {
     close (s);
   }
   return retVal;
 
 }
-
