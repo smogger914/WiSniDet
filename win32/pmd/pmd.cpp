@@ -216,6 +216,8 @@ DWORD PMD::queryInterface() {
  *  \retval 1 : At least one monitor mode card found.
  *  \retval 0 : No monitor mode cards found.
  *	\retval -1 : The process is broken.
+ *	\retval -2 : Monitor mode found but could not be stopped.
+ *	\retval -3 : Monitor mode found and stopped.
  */
 DWORD PMD::pmcheckwlan() {
 	
@@ -232,8 +234,14 @@ DWORD PMD::pmcheckwlan() {
 		rtn = queryInterface();
 		
 		if (rtn == 1) {
-			if (stopMonitorMode() == ERROR_SUCCESS) printf ("Monitor mode stopped~\n");
-			else printf ("Monitor mode failed to stop!\n");
+			if (stopMonitorMode() == ERROR_SUCCESS) {
+				printf ("Monitor mode stopped~\n");
+				rtn = -3;
+			}
+			else  {
+				printf ("Monitor mode failed to stop!\n");
+				rtn = -2;
+			}
 			cleanup();
           	return rtn;
         }

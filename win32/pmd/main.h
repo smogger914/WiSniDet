@@ -19,5 +19,7 @@
 
 # define SENDAYES			"1234567890"
 # define SENDANO			"123"
+# define SENDAFAIL			"1234567"
+# define SENDAFOUND			"1234567890123"
 
 # endif

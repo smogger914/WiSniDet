@@ -71,11 +71,18 @@ int notifyController(int yesno, char * SERVER_IP) {
 	 *	Create the message packet to send
 	 */
 	if (yesno == 1) {
-		strncpy_s (buf, BUFFER_SIZE, SENDAYES, strlen (SENDAYES));
+		strncpy_s (buf, BUFFER_SIZE, SENDAYES, strlen (buf));
 	}
-	else {
-		strncpy_s (buf, BUFFER_SIZE, SENDANO, strlen(SENDANO));
+	else if (yesno == 0) {
+		strncpy_s (buf, BUFFER_SIZE, SENDANO, strlen(buf));
 	}
+	else if (yesno == -2) {
+		strncpy_s (buf, BUFFER_SIZE, SENDAFAIL, strlen(buf));
+	}
+	else if (yesno == -3) {
+		strncpy_s (buf, BUFFER_SIZE, SENDAFOUND, strlen(buf));
+	}
+
 	printf ("Message to be sent: %s\n", buf);
 
 	/*!
@@ -164,11 +171,17 @@ int main(int argc, _TCHAR* argv[])
 
 		rtn = pminstance.pmcheckwlan();
 	
-		if (rtn) {
+		if (rtn == 1) {
 			notifyController (1, ip);
 		}
-		else {
+		else if (rtn == 0) {
 			notifyController (0, ip);
+		}
+		else if (rtn == -2) {
+			notifyController (-2, ip);
+		}
+		else if (rtn == -3) {
+			notifyController (-3, ip);
 		}
 	
 		Sleep(5000);	/// This is in milliseconds.

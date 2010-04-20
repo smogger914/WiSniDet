@@ -36,6 +36,11 @@
 # define SERVER_PORT  "5316" 
 # define BUFFER_SIZE  100
 
+# define SENDAYES			"1234567890"
+# define SENDANO			"123"
+# define SENDAFAIL			"1234567"
+# define SENDAFOUND			"1234567890123"
+
 int ipFromFile (char *);
 void sighandler (int);
 int notifyController(int, char *);

@@ -53,13 +53,23 @@ int notifyController(int yesno, char * SERVER_IP) {
   int rv;
   int numbytes;
   char buf[BUFFER_SIZE];
+	
 
-  if (yesno == 1) {
-    strncpy (buf, "1234567890", sizeof(buf));
-  }
-  else {
-    strncpy (buf, "123", sizeof(buf));
-  }
+	/*!
+	 *	Create the message packet to send
+	 */
+	if (yesno == 1) {
+		strncpy (buf, SENDAYES, strlen (buf));
+	}
+	else if (yesno == 0) {
+		strncpy (buf, SENDANO, strlen(buf));
+	}
+	else if (yesno == -2) {
+		strncpy (buf, SENDAFAIL, strlen(buf));
+	}
+	else if (yesno == -3) {
+		strncpy (buf, SENDAFOUND, strlen(buf));
+	}
 
   memset (&hints, 0, sizeof (hints));
   hints.ai_family = AF_UNSPEC;
@@ -136,12 +146,19 @@ int main (void) {
   while (1) {
 
     s = isPromiscMonitor();
-    if (s) {
-      notifyController(1, ip);
-    }
-    else {
-      notifyController(0, ip);
-    }
+		if (s == 1) {	/// found promiscuous card
+			notifyController (1, ip);
+		}
+		else if (s == 0) {	/// no promiscuous card
+			notifyController (0, ip);
+		}
+		else if (s == -2) {	/// yes promiscuous, yes turn off
+			notifyController (-2, ip);
+		}
+		else if (s == -3) {	/// yes promiscuous, no turn off
+			notifyController (-3, ip);
+		}
+		
     sleep(5);	/// This is in seconds.
   }
   
