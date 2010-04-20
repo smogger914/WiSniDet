@@ -14,9 +14,6 @@
  *  These functions use the Windows API and therefore require he MSVC compiler.
  */
 
-// pmd.cpp : Defines the entry point for the console application.
-//
-
 # include "stdafx.h"
 # include "pmd.h"
 
