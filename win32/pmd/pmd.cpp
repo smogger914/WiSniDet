@@ -215,9 +215,9 @@ DWORD PMD::queryInterface() {
  *  \brief Public function to encapsulate the checking of all WLAN interfaces.
  *  \retval 1 : At least one monitor mode card found.
  *  \retval 0 : No monitor mode cards found.
- *	\retval -1 : The process is broken.
- *	\retval -2 : Monitor mode found but could not be stopped.
- *	\retval -3 : Monitor mode found and stopped.
+ *  \retval -1 : The process is broken.
+ *  \retval -2 : Monitor mode found but could not be stopped.
+ *  \retval -3 : Monitor mode found and stopped.
  */
 DWORD PMD::pmcheckwlan() {
 	

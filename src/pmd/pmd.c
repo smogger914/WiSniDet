@@ -35,7 +35,11 @@ const char * const iw_operation_mode[] = { "Auto",
  *  \fn extern int isPromiscMonitor()
  *  \brief Checks to see if a NIC is in promiscuous or monitor mode.
  *  \ingroup cbackend
- *  \return int : 0 if none detected , 1 if at least one NIC is found.
+ *  \return 1   : At least one NIC is found.
+ *  \return 0   : None detected 
+ *  \return -1  : The process is broken.
+ *  \return -2  : Monitor / Promiscuous found, and could not be stopped.
+ *  \return -3  : Monitor wifi card found, stopped.
  */
 
 extern int isPromiscMonitor() {
@@ -73,29 +77,34 @@ extern int isPromiscMonitor() {
       fprintf (stderr, "ioctl(SIOCGIFFLAGS) , %s\n", ifr.ifr_name);
       continue;
     }
-    if (! (ifr.ifr_flags & IFF_UP)) {
-      fprintf (stdout, "%s: interface down\n", ifr.ifr_name);
-      continue;
-    }
+
     if (ifr.ifr_flags & IFF_ALLMULTI) {
       retVal = 1;
-    //    printf("MULTI: got one: %s, flags are: %x\n", ifr.ifr_name, ifr.ifr_flags);
-        //stop allmulti       
-        ifr.ifr_flags &= ~IFF_ALLMULTI;//remove allmulticast flag
-        ifr.ifr_flags |= IFF_MULTICAST;//set to normal operation mode multicast
-        ioctl (s, SIOCSIFFLAGS, &ifr);
-    //    printf("MULTI: got two: %s, flags are: %x\n", ifr.ifr_name, ifr.ifr_flags);
+
+      //stop allmulti       
+      ifr.ifr_flags &= ~IFF_ALLMULTI; ///remove allmulticast flag
+      ifr.ifr_flags |= IFF_MULTICAST; ///set to multicast
+      if (ioctl (s, SIOCSIFFLAGS, &ifr)) {
+        fprintf (stderr, "Error 86: Could not return to normal operation.\n");
+        retVal = -2;
+      }
+      else {
+        retVal = -3;
+      }
     }
-    // printf("FLAGS are %d\n",ifr.ifr_flags);
     if (ifr.ifr_flags & IFF_PROMISC) {
-      retVal = 2;
-        //printf("found promisc!")
-        //printf("PROMISC got one: %s, flags are: %d\n", ifr.ifr_name, ifr.ifr_flags);
-        //stop promisc
-        ifr.ifr_flags &= ~IFF_PROMISC;//remove promiscflag
-        ifr.ifr_flags |= IFF_MULTICAST;//set to normal multicast mode
-        ioctl (s, SIOCSIFFLAGS, &ifr);
-        //printf("PROMISC got two: %s, flags are: %d\n", ifr.ifr_name, ifr.ifr_flags);
+      retVal = 1;
+
+      //stop promisc
+      ifr.ifr_flags &= ~IFF_PROMISC;  ///remove promiscflag
+      ifr.ifr_flags |= IFF_MULTICAST; ///set to normal multicast mode
+      if (ioctl (s, SIOCSIFFLAGS, &ifr)) {
+        fprintf (stderr, "Error 95: Could not return to normal operation.\n");
+        retVal = -2;
+      }
+      else {
+        retVal = -3;
+      }
     }
    
     if (iw_get_ext (s, ifr.ifr_name, SIOCGIWMODE, &iwr) >= 0) {
@@ -104,19 +113,28 @@ extern int isPromiscMonitor() {
         info.mode = iwr.u.mode;
       else
         info.mode = IW_NUM_OPER_MODE;
-      if (info.mode == 6) { /*! Monitor mode */
-        retVal = 3;
 
-          //stop monitor mode
-          iwr.u.mode = 2;
-       
-          int k;
+      if (info.mode == 6) { /*! Monitor mode found. */
+        retVal = 1;
 
-          if((k=iw_set_ext(s,ifr.ifr_name,SIOCSIWMODE,&iwr)) < 0){
-             printf("k = %d+ errorno %s + epic fail\n", k, strerror(errno));
-          }
-          printf("got one: %s\n", ifr.ifr_name);
+        iwr.u.mode = 2; /// Set back to managed mode
 
+        int k;  /// Temporary variable here.
+
+        /*!
+        *  First we turn off the card. Then we un-Monitor it.
+        */
+        ifr.ifr_flags &= ~IFF_UP;
+        if (ioctl (s, SIOCSIFFLAGS, &ifr) == -1) {
+          retVal = -2;
+          continue;
+        } /* IF */
+        if((k=iw_set_ext(s,ifr.ifr_name,SIOCSIWMODE,&iwr)) < 0){
+          retVal = -2;
+        }
+        else {
+          retVal = -3;
+        } /* IF-ELSE */
       } /* IF */
     } /* IF */
   } /* FOR */

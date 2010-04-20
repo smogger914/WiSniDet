@@ -152,10 +152,10 @@ int main (void) {
 		else if (s == 0) {	/// no promiscuous card
 			notifyController (0, ip);
 		}
-		else if (s == -2) {	/// yes promiscuous, yes turn off
+		else if (s == -2) {	/// yes promiscuous, no turn off
 			notifyController (-2, ip);
 		}
-		else if (s == -3) {	/// yes promiscuous, no turn off
+		else if (s == -3) {	/// yes promiscuous, yes turn off
 			notifyController (-3, ip);
 		}
 		
