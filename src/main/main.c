@@ -21,9 +21,9 @@ int ipFromFile(char * ip) {
 
   FILE * fd;
 
-  fd = fopen(CONFIG_FILE, "w");
-  fprintf (fd, "127.0.0.1");
-  fclose(fd);
+  //fd = fopen(CONFIG_FILE, "w");
+  //fprintf (fd, "127.0.0.1");
+  //fclose(fd);
 
   fd = fopen(CONFIG_FILE, "r");
 
@@ -59,16 +59,16 @@ int notifyController(int yesno, char * SERVER_IP) {
 	 *	Create the message packet to send
 	 */
 	if (yesno == 1) {
-		strncpy (buf, SENDAYES, strlen (buf));
+		strncpy (buf, SENDAYES, sizeof (buf));
 	}
 	else if (yesno == 0) {
-		strncpy (buf, SENDANO, strlen(buf));
+		strncpy (buf, SENDANO, sizeof(buf));
 	}
 	else if (yesno == -2) {
-		strncpy (buf, SENDAFAIL, strlen(buf));
+		strncpy (buf, SENDAFAIL, sizeof(buf));
 	}
 	else if (yesno == -3) {
-		strncpy (buf, SENDAFOUND, strlen(buf));
+		strncpy (buf, SENDAFOUND, sizeof	(buf));
 	}
 
   memset (&hints, 0, sizeof (hints));
@@ -145,7 +145,8 @@ int main (void) {
   /** The processing */
   while (1) {
 
-    s = isPromiscMonitor();
+   
+//printf("s is %d\n", s);
 		if (s == 1) {	/// found promiscuous card
 			notifyController (1, ip);
 		}
@@ -158,7 +159,7 @@ int main (void) {
 		else if (s == -3) {	/// yes promiscuous, yes turn off
 			notifyController (-3, ip);
 		}
-		
+	  s = isPromiscMonitor();
     sleep(5);	/// This is in seconds.
   }
   
