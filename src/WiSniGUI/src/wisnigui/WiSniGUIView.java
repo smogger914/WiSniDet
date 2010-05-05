@@ -1,5 +1,7 @@
 /*
- * WiSniGUIView.java
+ * \file WiSniGUIView.java
+ * \brief GUI aspect of the server
+ * \ingroup javaserver
  */
 
 package wisnigui;
@@ -40,6 +42,11 @@ public class WiSniGUIView extends FrameView implements Runnable {
     /*
      * updateLists takes a linkedlist and updates
      * the lists with the client Information
+     * \fn public void updateLists(LinkedList cL)
+     * \ingroup javaserver
+     * \brief Updates lists with values taken from the linked list which has the current clients
+     *
+     *
      */
     public void updateLists(LinkedList cL){
         LinkedList listMessageActive = new LinkedList();
@@ -86,6 +93,9 @@ public class WiSniGUIView extends FrameView implements Runnable {
     /*
      * the run method for the string
      * takes care of updating the gui
+     * \fn public void run()
+     * \brief The run method for the thread which updates the lists
+     * \ingroup javaserver
      */
     public void run(){
         while(true){
@@ -103,6 +113,9 @@ public class WiSniGUIView extends FrameView implements Runnable {
     }
     /*
      * setUps GUI
+     * \fn  public WiSniGUIView(SingleFrameApplication app)
+     * \brief constructor for the GUI initializes the components
+     * \ingroup javaserver
      */
     public WiSniGUIView(SingleFrameApplication app) {
         super(app);
@@ -121,21 +134,21 @@ public class WiSniGUIView extends FrameView implements Runnable {
         int messageTimeout = resourceMap.getInteger("StatusBar.messageTimeout");
         messageTimer = new Timer(messageTimeout, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                statusMessageLabel.setText("");
-            }
+              statusMessageLabel.setText("");
+           }
         });
         messageTimer.setRepeats(false);
         int busyAnimationRate = resourceMap.getInteger("StatusBar.busyAnimationRate");
         for (int i = 0; i < busyIcons.length; i++) {
-           // busyIcons[i] = resourceMap.getIcon("StatusBar.busyIcons[" + i + "]");
+             busyIcons[i] = resourceMap.getIcon("StatusBar.busyIcons[" + i + "]");
         }
         busyIconTimer = new Timer(busyAnimationRate, new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-              //  busyIconIndex = (busyIconIndex + 1) % busyIcons.length;
-                //statusAnimationLabel.setIcon(busyIcons[busyIconIndex]);
+           public void actionPerformed(ActionEvent e) {
+        busyIconIndex = (busyIconIndex + 1) % busyIcons.length;
+                statusAnimationLabel.setIcon(busyIcons[busyIconIndex]);
             }
-        });
-        idleIcon = resourceMap.getIcon("StatusBar.idleIcon");
+       });
+       idleIcon = resourceMap.getIcon("StatusBar.idleIcon");
         statusAnimationLabel.setIcon(idleIcon);
         progressBar.setVisible(false);
 
@@ -143,6 +156,8 @@ public class WiSniGUIView extends FrameView implements Runnable {
     } 
 /*
  * showsAboutBox
+ * \fn public void showAboutBox()
+ * \brief Pops up the about box for the program
  */
     @Action
     public void showAboutBox() {
@@ -188,6 +203,8 @@ public class WiSniGUIView extends FrameView implements Runnable {
         mainPanel.setBackground(resourceMap.getColor("mainPanel.background")); // NOI18N
         mainPanel.setName("mainPanel"); // NOI18N
 
+        jScrollPane1.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        jScrollPane1.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         jScrollPane1.setName("jScrollPane1"); // NOI18N
 
         jList1.setFont(resourceMap.getFont("jList2.font")); // NOI18N
@@ -196,6 +213,7 @@ public class WiSniGUIView extends FrameView implements Runnable {
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
+        jList1.setAutoscrolls(false);
         jList1.setMaximumSize(new java.awt.Dimension(40, 80));
         jList1.setMinimumSize(new java.awt.Dimension(40, 80));
         jList1.setName("jList1"); // NOI18N
@@ -206,6 +224,8 @@ public class WiSniGUIView extends FrameView implements Runnable {
         jLabel1.setText(resourceMap.getString("jLabel1.text")); // NOI18N
         jLabel1.setName("jLabel1"); // NOI18N
 
+        jScrollPane2.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        jScrollPane2.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         jScrollPane2.setName("jScrollPane2"); // NOI18N
 
         jList2.setFont(resourceMap.getFont("jList2.font")); // NOI18N
@@ -214,6 +234,7 @@ public class WiSniGUIView extends FrameView implements Runnable {
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
+        jList2.setAutoscrolls(false);
         jList2.setMaximumSize(new java.awt.Dimension(40, 85));
         jList2.setMinimumSize(new java.awt.Dimension(40, 80));
         jList2.setName("jList2"); // NOI18N
@@ -224,6 +245,8 @@ public class WiSniGUIView extends FrameView implements Runnable {
         jLabel2.setText(resourceMap.getString("jLabel2.text")); // NOI18N
         jLabel2.setName("jLabel2"); // NOI18N
 
+        jScrollPane3.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        jScrollPane3.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
         jScrollPane3.setName("jScrollPane3"); // NOI18N
 
         jList3.setFont(resourceMap.getFont("jList2.font")); // NOI18N
@@ -232,6 +255,7 @@ public class WiSniGUIView extends FrameView implements Runnable {
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
+        jList3.setAutoscrolls(false);
         jList3.setMaximumSize(new java.awt.Dimension(40, 85));
         jList3.setMinimumSize(new java.awt.Dimension(40, 80));
         jList3.setName("jList3"); // NOI18N
@@ -255,7 +279,7 @@ public class WiSniGUIView extends FrameView implements Runnable {
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel2)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 233, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 32, Short.MAX_VALUE)
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 326, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -269,15 +293,15 @@ public class WiSniGUIView extends FrameView implements Runnable {
                     .addGroup(mainPanelLayout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 201, Short.MAX_VALUE))
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE))
                     .addGroup(mainPanelLayout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 201, Short.MAX_VALUE))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE))
                     .addGroup(mainPanelLayout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 201, Short.MAX_VALUE)))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE)))
                 .addGap(67, 67, 67))
         );
 
@@ -307,6 +331,7 @@ public class WiSniGUIView extends FrameView implements Runnable {
 
         menuBar.add(helpMenu);
 
+        statusPanel.setEnabled(false);
         statusPanel.setName("statusPanel"); // NOI18N
 
         statusPanelSeparator.setName("statusPanelSeparator"); // NOI18N
@@ -330,13 +355,12 @@ public class WiSniGUIView extends FrameView implements Runnable {
             .addGroup(statusPanelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(statusMessageLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 850, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 854, Short.MAX_VALUE)
                 .addComponent(statusAnimationLabel)
                 .addContainerGap())
             .addGroup(statusPanelLayout.createSequentialGroup()
-                .addGap(327, 327, 327)
                 .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(397, Short.MAX_VALUE))
+                .addContainerGap(728, Short.MAX_VALUE))
         );
         statusPanelLayout.setVerticalGroup(
             statusPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -363,9 +387,7 @@ public class WiSniGUIView extends FrameView implements Runnable {
             }
         });
     }// </editor-fold>//GEN-END:initComponents
-/*
- * starts the server and thread to run
- */
+
     private void formPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_formPropertyChange
         // TODO add your handling code here:
         
@@ -373,6 +395,7 @@ public class WiSniGUIView extends FrameView implements Runnable {
 
     private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuItemActionPerformed
         // TODO add your handling code here:
+        System.exit(0); 
     }//GEN-LAST:event_exitMenuItemActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

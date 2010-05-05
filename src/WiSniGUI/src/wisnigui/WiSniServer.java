@@ -1,4 +1,7 @@
-
+/* \file WiSniServer.java
+ * \brief Handles receiving packets from the clients and updates the linked list with infomation
+ * \ingroup javaserver
+ */
 package wisnigui;
 
 import java.net.*;
@@ -14,6 +17,9 @@ DatagramSocket aSocket;
 
         /*
          * thread stuff for server
+         * \fn public void run()
+         * \ingroup javaserver
+         * \brief the threads run() method receives datagram packets and adds them to the linked list
          */
         public void run(){
             try{
@@ -23,13 +29,8 @@ DatagramSocket aSocket;
 			while (true){
 				DatagramPacket request = new DatagramPacket(buffer,buffer.length);
 				aSocket.receive(request);
-                                //System.out.println("got one");
-                                //System.out.println(request.getAddress());
-                                //System.out.println(request.getLength());
                                 addClientToList(request);
-				//DatagramPacket reply = new DatagramPacket(d.getData(), d
-				//.getLength(), request.getAddress(), request.getPort());
-				//aSocket.send(reply);
+				
 			}
 		}
 		catch (SocketException e){
@@ -45,27 +46,28 @@ DatagramSocket aSocket;
         }
         /*
          *adds client IP to the list of clients
+         * \fn  public static void addClientToList(DatagramPacket d)
+         * \ingroup javaserver
+         * \brief adds a packet to a linked list
          */
         public static void addClientToList(DatagramPacket d){
-           // System.out.println(d);
-            //String temp;
-            //temp = d.getHostName();
+         
             clientList.add(d);
         }
         /*
-         * returns the LinkedList of clients
+         * \fn public static LinkedList getClientList()
+         * \ingroup javaserver
+         * \brief returns a linkedlist of the datagram packets
          */
         public static LinkedList getClientList(){
             return clientList;
         }
-        
-	
         /*
-         * the actauly server work
-         * waits for a Datagram and adds its sender to the list
+         * \fn WiSniServer()
+         * \brief constructor for the server
          */
         WiSniServer(){
-                //System.out.println("starting server");
+                
 		aSocket = null;
 		
 	}

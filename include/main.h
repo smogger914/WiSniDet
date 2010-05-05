@@ -31,7 +31,7 @@
 # include "pmd.h"
 # include "cpumon.h"
 
-# define CONFIG_FILE  "pmd.conf"
+# define CONFIG_FILE  "./pmd.conf"
 
 # define SERVER_PORT  "5316" 
 # define BUFFER_SIZE  100
